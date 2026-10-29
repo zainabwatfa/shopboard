@@ -4,10 +4,386 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>shopboard</title>
+    <meta name="description" content="ShopBoard: browse products and create your seller account." />
+    <title>ShopBoard</title>
+    <style>
+      :root {
+        --text: #3f3a48;
+        --text-h: #08060d;
+        --bg: #fff;
+        --surface: #f7f6f9;
+        --border: #e0dee4;
+        --accent: #6d28d9;
+        --accent-text: #fff;
+        --error: #b91c1c;
+        color-scheme: light dark;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --text: #c4c0cc;
+          --text-h: #f3f4f6;
+          --bg: #16171d;
+          --surface: #1f2028;
+          --border: #2e303a;
+          --accent: #c084fc;
+          --accent-text: #16171d;
+          --error: #f87171;
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 1rem/1.5 system-ui, "Segoe UI", Roboto, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      h1,
+      h2,
+      h3 {
+        color: var(--text-h);
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+      }
+
+      p {
+        margin: 0 0 1rem;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      :focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      .skip-link {
+        position: absolute;
+        left: 1rem;
+        top: -4rem;
+        padding: 0.5rem 1rem;
+        background: var(--accent);
+        color: var(--accent-text);
+      }
+
+      .skip-link:focus {
+        top: 1rem;
+      }
+
+      .container {
+        width: min(100% - 2rem, 70rem);
+        margin-inline: auto;
+      }
+
+      /* Header + nav: stacked on mobile, one row from 40rem */
+      .site-header {
+        border-bottom: 1px solid var(--border);
+      }
+
+      .site-header .container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-block: 0.75rem;
+      }
+
+      .logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-h);
+        text-decoration: none;
+      }
+
+      .nav-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.25rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .nav-list a {
+        display: inline-block;
+        padding: 0.5rem 0;
+        color: var(--text-h);
+      }
+
+      /* Sections */
+      main > section {
+        padding-block: 2.5rem;
+      }
+
+      .hero {
+        background: var(--surface);
+      }
+
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 0.75rem 1.25rem;
+        border: 2px solid var(--accent);
+        border-radius: 0.5rem;
+        background: var(--accent);
+        color: var(--accent-text);
+        font: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .button:hover {
+        opacity: 0.9;
+      }
+
+      /* Product cards: 1 column, then 2, then 3 */
+      .product-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .product-card {
+        display: flex;
+        flex-direction: column;
+        padding: 1.25rem;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--surface);
+      }
+
+      .product-card p:last-of-type {
+        flex-grow: 1;
+      }
+
+      .price {
+        font-weight: 700;
+        color: var(--text-h);
+      }
+
+      /* Form */
+      .register-form {
+        display: grid;
+        gap: 1rem;
+        max-width: 28rem;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .field label {
+        font-weight: 600;
+        color: var(--text-h);
+      }
+
+      .hint {
+        margin: 0;
+        font-size: 0.875rem;
+      }
+
+      input:not([type="checkbox"]),
+      select {
+        width: 100%;
+        padding: 0.625rem 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        background: var(--bg);
+        color: var(--text-h);
+        font: inherit;
+      }
+
+      /* Only flag fields after the user has typed something invalid */
+      input:user-invalid,
+      select:user-invalid {
+        border-color: var(--error);
+      }
+
+      .field-check {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .field-check input {
+        margin-top: 0.3rem;
+      }
+
+      .field-check label {
+        font-weight: 400;
+      }
+
+      .site-footer {
+        padding-block: 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.875rem;
+      }
+
+      @media (min-width: 40rem) {
+        .site-header .container {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .hero h1 {
+          font-size: 2.75rem;
+        }
+
+        .product-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 64rem) {
+        main > section {
+          padding-block: 4rem;
+        }
+
+        .hero h1 {
+          font-size: 3.5rem;
+        }
+
+        .product-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container">
+        <a class="logo" href="#top">ShopBoard</a>
+        <nav aria-label="Main">
+          <ul class="nav-list">
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#products">Products</a></li>
+            <li><a href="#register">Register</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <section id="hero" class="hero" aria-labelledby="hero-title">
+        <div class="container">
+          <h1 id="hero-title">Run your shop from one board</h1>
+          <p>
+            ShopBoard keeps your products, prices and orders in one simple place,
+            so you can spend less time on admin and more time selling.
+          </p>
+          <a class="button" href="#register">Get started</a>
+        </div>
+      </section>
+
+      <section id="products" aria-labelledby="products-title">
+        <div class="container">
+          <h2 id="products-title">Featured products</h2>
+          <div class="product-grid">
+            <article class="product-card">
+              <h3>Canvas Tote Bag</h3>
+              <p>Sturdy everyday tote with an inner zip pocket.</p>
+              <p class="price">$18.00</p>
+              <button class="button" type="button">Add to board</button>
+            </article>
+            <article class="product-card">
+              <h3>Ceramic Mug</h3>
+              <p>Hand-glazed 350&nbsp;ml mug, dishwasher safe.</p>
+              <p class="price">$12.50</p>
+              <button class="button" type="button">Add to board</button>
+            </article>
+            <article class="product-card">
+              <h3>Notebook Set</h3>
+              <p>Three dotted A5 notebooks with recycled covers.</p>
+              <p class="price">$15.00</p>
+              <button class="button" type="button">Add to board</button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="register" aria-labelledby="register-title">
+        <div class="container">
+          <h2 id="register-title">Create your account</h2>
+          <p>Fields marked with * are required.</p>
+
+          <form class="register-form" action="#" method="post">
+            <div class="field">
+              <label for="full-name">Full name *</label>
+              <input
+                id="full-name"
+                name="fullName"
+                type="text"
+                autocomplete="name"
+                required
+                minlength="2"
+              />
+            </div>
+
+            <div class="field">
+              <label for="email">Email *</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="field">
+              <label for="password">Password *</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autocomplete="new-password"
+                required
+                minlength="8"
+                aria-describedby="password-hint"
+              />
+              <p id="password-hint" class="hint">At least 8 characters.</p>
+            </div>
+
+            <div class="field">
+              <label for="account-type">Account type *</label>
+              <select id="account-type" name="accountType" required>
+                <option value="">Choose one…</option>
+                <option value="buyer">Buyer</option>
+                <option value="seller">Seller</option>
+              </select>
+            </div>
+
+            <div class="field field-check">
+              <input id="terms" name="terms" type="checkbox" required />
+              <label for="terms">I agree to the terms of use *</label>
+            </div>
+
+            <button class="button" type="submit">Register</button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>&copy; 2026 ShopBoard</p>
+      </div>
+    </footer>
   </body>
 </html>
