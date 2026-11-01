@@ -148,6 +148,13 @@
         opacity: 0.9;
       }
 
+      /* Search + filter + sort controls: stacked on mobile, one row from 40rem */
+      .filters {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
       /* Product cards: 1 column, then 2, then 3 */
       .product-grid {
         display: grid;
@@ -163,12 +170,70 @@
         background: var(--surface);
       }
 
-      .product-card p:last-of-type {
-        flex-grow: 1;
+      .category {
+        margin: 0 0 0.25rem;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
       .price {
+        flex-grow: 1;
         font-weight: 700;
+        color: var(--text-h);
+      }
+
+      /* Cart rows: name on its own line on mobile, one row from 40rem */
+      .cart-list {
+        display: grid;
+        gap: 0.75rem;
+        margin: 0 0 1rem;
+        padding: 0;
+        list-style: none;
+      }
+
+      .cart-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        background: var(--surface);
+      }
+
+      .cart-name {
+        flex: 1 1 100%;
+        font-weight: 600;
+        color: var(--text-h);
+      }
+
+      .cart-qty {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .cart-line {
+        margin-left: auto;
+        font-weight: 700;
+        color: var(--text-h);
+      }
+
+      .button-small {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+        padding: 0.375rem 0.75rem;
+      }
+
+      .button-secondary {
+        background: transparent;
+        color: var(--accent);
+      }
+
+      .cart-summary p {
+        font-size: 1.25rem;
         color: var(--text-h);
       }
 
@@ -243,6 +308,14 @@
           font-size: 2.75rem;
         }
 
+        .filters {
+          grid-template-columns: 2fr 1fr 1fr;
+        }
+
+        .cart-name {
+          flex: 1 1 0;
+        }
+
         .product-grid {
           grid-template-columns: repeat(2, 1fr);
         }
@@ -274,6 +347,9 @@
             <li><a href="#hero">Home</a></li>
             <li><a href="#products">Products</a></li>
             <li><a href="#register">Register</a></li>
+            <li>
+              <a href="#cart">Cart (<span id="cart-count" aria-live="polite">0</span>)</a>
+            </li>
           </ul>
         </nav>
       </div>
@@ -294,25 +370,46 @@
       <section id="products" aria-labelledby="products-title">
         <div class="container">
           <h2 id="products-title">Featured products</h2>
-          <div class="product-grid">
-            <article class="product-card">
-              <h3>Canvas Tote Bag</h3>
-              <p>Sturdy everyday tote with an inner zip pocket.</p>
-              <p class="price">$18.00</p>
-              <button class="button" type="button">Add to board</button>
-            </article>
-            <article class="product-card">
-              <h3>Ceramic Mug</h3>
-              <p>Hand-glazed 350&nbsp;ml mug, dishwasher safe.</p>
-              <p class="price">$12.50</p>
-              <button class="button" type="button">Add to board</button>
-            </article>
-            <article class="product-card">
-              <h3>Notebook Set</h3>
-              <p>Three dotted A5 notebooks with recycled covers.</p>
-              <p class="price">$15.00</p>
-              <button class="button" type="button">Add to board</button>
-            </article>
+          <div class="filters" role="search">
+            <div class="field">
+              <label for="search">Search products</label>
+              <input id="search" type="search" placeholder="e.g. bag" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label for="category-filter">Category</label>
+              <select id="category-filter">
+                <option value="all">All categories</option>
+                <option value="Bags">Bags</option>
+                <option value="Shoes">Shoes</option>
+                <option value="Accessories">Accessories</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sort">Sort by</label>
+              <select id="sort">
+                <option value="default">Default</option>
+                <option value="price-asc">Price: low to high</option>
+                <option value="price-desc">Price: high to low</option>
+                <option value="name-asc">Name: A to Z</option>
+              </select>
+            </div>
+          </div>
+          <p id="product-status" class="hint" aria-live="polite"></p>
+          <div id="product-grid" class="product-grid"></div>
+          <noscript><p>Please enable JavaScript to see the products.</p></noscript>
+        </div>
+      </section>
+
+      <section id="cart" aria-labelledby="cart-title">
+        <div class="container">
+          <h2 id="cart-title" tabindex="-1">Your cart</h2>
+          <p id="cart-empty">Your cart is empty. Add something from the products above.</p>
+          <ul id="cart-list" class="cart-list"></ul>
+          <div id="cart-summary" class="cart-summary">
+            <p>Total: <strong id="cart-total">$0.00</strong></p>
+            <button id="cart-clear" class="button button-secondary" type="button">
+              Clear cart
+            </button>
           </div>
         </div>
       </section>
@@ -385,5 +482,7 @@
         <p>&copy; 2026 ShopBoard</p>
       </div>
     </footer>
+
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
