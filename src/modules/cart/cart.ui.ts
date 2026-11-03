@@ -85,6 +85,15 @@ export function renderCart({ lines, count, total }: CartView): void {
   getElement("cart-total", HTMLElement).textContent = formatMoney(total);
 }
 
+// The browser fires "storage" in the other open tabs of this site when saved
+// data changes. This file doesn't know which data is the cart, so every change
+// is reported. Call once, on every page (the header badge is on every page).
+export function bindCartSync(onChange: () => void): void {
+  window.addEventListener("storage", () => {
+    onChange();
+  });
+}
+
 export function bindCartEvents(handlers: CartHandlers): void {
   const cartList = getElement("cart-list", HTMLUListElement);
   const cartTitle = getElement("cart-title", HTMLHeadingElement);

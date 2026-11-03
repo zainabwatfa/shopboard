@@ -4,90 +4,90 @@
     "name": "Leather Tote Bag",
     "category": "Bags",
     "price": 89,
-    "image": "/products/leather-tote-bag.svg"
+    "image": "products/leather-tote-bag.svg"
   },
   {
     "id": 2,
     "name": "Canvas Backpack",
     "category": "Bags",
     "price": 49,
-    "image": "/products/canvas-backpack.svg"
+    "image": "products/canvas-backpack.svg"
   },
   {
     "id": 3,
     "name": "Mini Crossbody Bag",
     "category": "Bags",
     "price": 39,
-    "image": "/products/mini-crossbody-bag.svg"
+    "image": "products/mini-crossbody-bag.svg"
   },
   {
     "id": 4,
     "name": "White Sneakers",
     "category": "Shoes",
     "price": 75,
-    "image": "/products/white-sneakers.svg"
+    "image": "products/white-sneakers.svg"
   },
   {
     "id": 5,
     "name": "Running Shoes",
     "category": "Shoes",
     "price": 110,
-    "image": "/products/running-shoes.svg"
+    "image": "products/running-shoes.svg"
   },
   {
     "id": 6,
     "name": "Suede Loafers",
     "category": "Shoes",
     "price": 95,
-    "image": "/products/suede-loafers.svg"
+    "image": "products/suede-loafers.svg"
   },
   {
     "id": 7,
-    "name": "hand bag",
-    "category": "Accessories",
+    "name": "Hand Bag",
+    "category": "Bags",
     "price": 25,
-    "image": "/products/hand-bag.svg"
+    "image": "products/hand-bag.svg"
   },
   {
     "id": 8,
     "name": "Silver Watch",
     "category": "Accessories",
     "price": 150,
-    "image": "/products/silver-watch.svg"
+    "image": "products/silver-watch.svg"
   },
   {
     "id": 9,
     "name": "Sunglasses",
     "category": "Accessories",
     "price": 35,
-    "image": "/products/sunglasses.svg"
+    "image": "products/sunglasses.svg"
   },
   {
     "id": 10,
     "name": "Travel Duffel Bag",
     "category": "Bags",
     "price": 120,
-    "image": "/products/travel-duffel-bag.svg"
+    "image": "products/travel-duffel-bag.svg"
   },
   {
     "id": 11,
     "name": "Rain Boots",
     "category": "Shoes",
     "price": 60,
-    "image": "/products/rain-boots.svg"
+    "image": "products/rain-boots.svg"
   },
   {
     "id": 12,
     "name": "Leather Belt",
     "category": "Accessories",
     "price": 30,
-    "image": "/products/leather-belt.svg"
+    "image": "products/leather-belt.svg"
   },
   {
     "id": 13,
     "name": "Leather Wallet",
     "category": "Accessories",
     "price": 45,
-    "image": "/products/leather-wallet.svg"
+    "image": "products/leather-wallet.svg"
   }
 ]

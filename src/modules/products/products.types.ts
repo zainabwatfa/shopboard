@@ -7,7 +7,7 @@ export type Product = {
   name: string;
   category: Category;
   price: number;
-  image: string; // path inside public/, e.g. "/products/sunglasses.svg"
+  image: string; // path inside public/, no leading "/", e.g. "products/sunglasses.svg"
 };
 
 export type SortKey = "default" | "price-asc" | "price-desc" | "name-asc";
