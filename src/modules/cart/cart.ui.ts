@@ -1,7 +1,8 @@
 // Draws the cart (the header badge on every page, the full cart on the cart page)
 // and reports what the user does there to main.ts.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
-import type { CartHandlers, CartLine, CartView } from "./cart.types.ts";
+import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
+import type { CartChange, CartHandlers, CartLine, CartView } from "./cart.types.ts";
 
 // The number next to "Cart" in the header, on every page
 export function renderCartCount(count: number): void {
@@ -44,9 +45,13 @@ function createCartRow({ product, qty, lineTotal }: CartLine): HTMLLIElement {
 
   const qtyBox = document.createElement("div");
   qtyBox.className = "cart-qty";
+  // Screen readers ignore aria-label on a plain <span>, so "Quantity" is real
+  // text, only hidden on screen: they read "Quantity 2", sighted users see "2"
   const amount = document.createElement("span");
-  amount.textContent = String(qty);
-  amount.setAttribute("aria-label", `Quantity: ${qty}`);
+  const amountLabel = document.createElement("span");
+  amountLabel.className = "visually-hidden";
+  amountLabel.textContent = "Quantity ";
+  amount.append(amountLabel, String(qty));
   qtyBox.append(
     createCartButton("−", "dec", product.id, `Decrease quantity of ${product.name}`),
     amount,
@@ -69,9 +74,41 @@ function createCartRow({ product, qty, lineTotal }: CartLine): HTMLLIElement {
   return row;
 }
 
-// The line under the heading: "Loading…" or an error. Empty once the cart is drawn.
+// The line under the heading: "Loading…", or empty once the cart is drawn.
+// It hides the "Try again" button.
 export function renderCartStatus(message: string): void {
-  getElement("cart-status", HTMLParagraphElement).textContent = message;
+  renderStatusLine("cart-status", message, "normal");
+  showStatusButton("cart-status", "retry", false);
+}
+
+// Loading failed: the message, and the "Try again" button under it
+export function renderCartError(message: string): void {
+  renderStatusLine("cart-status", message, "error");
+  showStatusButton("cart-status", "retry", true);
+}
+
+// The sentence for one change, e.g. "Leather Tote Bag: quantity 2. Cart total $178.00."
+function describeChange(change: CartChange, { count, total }: CartView): string {
+  const after = count === 0 ? "Your cart is empty." : `Cart total ${formatMoney(total)}.`;
+  switch (change.type) {
+    case "quantity":
+      return `${change.name}: quantity ${change.qty}. ${after}`;
+    case "removed":
+      return `${change.name} removed from your cart. ${after}`;
+    case "cleared":
+      return "Cart cleared. Your cart is empty.";
+  }
+}
+
+// Says what just changed (view is the cart after the change) in the hidden
+// status line that bindCartEvents adds. Emptied first and filled on the next
+// frame, so the same sentence twice in a row is read out again.
+export function renderCartChange(change: CartChange, view: CartView): void {
+  const announcer = getElement("cart-announcer", HTMLParagraphElement);
+  announcer.textContent = "";
+  requestAnimationFrame(() => {
+    announcer.textContent = describeChange(change, view);
+  });
 }
 
 // Draws the cart page: rows, item count, total, empty message
@@ -118,9 +155,26 @@ export function bindCartSync(onChange: () => void): void {
   });
 }
 
+// The "Try again" button that renderCartError shows. Call once, before loading.
+export function bindCartRetry(onRetry: () => void): void {
+  addStatusButton("cart-status", "retry", "Try again", onRetry);
+}
+
+// Call once, when the cart is drawn for the first time.
 export function bindCartEvents(handlers: CartHandlers): void {
   const cartList = getElement("cart-list", HTMLUListElement);
   const cartTitle = getElement("cart-title", HTMLHeadingElement);
+
+  // Screen readers aren't told when a row changes, so renderCartChange also
+  // says it in words here. Hidden on screen; role="status" means it is read
+  // out politely, after what the user is hearing now. It is added before the
+  // first change, because a live region that appears with its text is not read.
+  // It goes before the status line: the "Try again" box must stay right after it.
+  const announcer = document.createElement("p");
+  announcer.id = "cart-announcer";
+  announcer.className = "visually-hidden";
+  announcer.setAttribute("role", "status");
+  getElement("cart-status", HTMLParagraphElement).before(announcer);
 
   cartList.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
@@ -141,7 +195,11 @@ export function bindCartEvents(handlers: CartHandlers): void {
     (same ?? cartTitle).focus();
   });
 
+  // Clearing removes every row at once and can't be undone, so ask first.
+  // confirm() is the browser's own dialog: it works with the keyboard and
+  // screen readers, and Cancel (or Esc) changes nothing.
   getElement("cart-clear", HTMLButtonElement).addEventListener("click", () => {
+    if (!window.confirm("Remove all items from your cart?")) return;
     handlers.onClear();
     cartTitle.focus();
   });

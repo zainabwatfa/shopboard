@@ -1,7 +1,9 @@
 // Draws the shop page and the product page, and reports what the user does
 // there to main.ts.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
+import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
 import type {
+  Filters,
   Product,
   ProductPageHandlers,
   ProductPageView,
@@ -16,6 +18,21 @@ export function getFilters(): RawFilters {
     category: getElement("category-filter", HTMLSelectElement).value,
     sortKey: getElement("sort", HTMLSelectElement).value,
   };
+}
+
+// Puts checked filters into the three controls: the ones from the address
+// bar when the shop opens, or the defaults after "Clear filters"
+export function renderFilters({ query, category, sortKey }: Filters): void {
+  getElement("search", HTMLInputElement).value = query;
+  getElement("category-filter", HTMLSelectElement).value = category;
+  getElement("sort", HTMLSelectElement).value = sortKey;
+}
+
+// The controls can't do anything while there are no products (loading failed)
+export function renderFiltersEnabled(enabled: boolean): void {
+  getElement("search", HTMLInputElement).disabled = !enabled;
+  getElement("category-filter", HTMLSelectElement).disabled = !enabled;
+  getElement("sort", HTMLSelectElement).disabled = !enabled;
 }
 
 // No leading "/", so the link also works when the site lives in a sub-folder
@@ -63,26 +80,40 @@ function createCard(product: Product, index: number): HTMLElement {
   button.type = "button";
   button.textContent = "Add to cart";
   button.dataset.id = String(product.id);
-  button.setAttribute("aria-label", `Add ${product.name} to cart`);
+  // The name starts with the visible words, so "click Add to cart" works in
+  // voice control, and screen readers still hear which product it is
+  button.setAttribute("aria-label", `Add to cart: ${product.name}`);
 
   body.append(category, title, price, button);
   card.append(media, body);
   return card;
 }
 
+// totalCount is how many products the shop has. When the filters leave none,
+// the "Clear filters" button offers the way back (not when the shop has none).
 export function renderProducts(list: readonly Product[], totalCount: number): void {
   getElement("product-grid", HTMLDivElement).replaceChildren(...list.map(createCard));
-  renderProductsStatus(
-    list.length === 0
-      ? "No products match your search."
-      : `Showing ${list.length} of ${totalCount} products`,
-  );
+  if (totalCount === 0) {
+    renderStatusLine("product-status", "No products are available right now.", "empty");
+  } else if (list.length === 0) {
+    renderStatusLine("product-status", "No products match your search.", "empty");
+  } else {
+    renderStatusLine("product-status", `Showing ${list.length} of ${totalCount} products`, "normal");
+  }
+  showStatusButton("product-status", "clear", totalCount > 0 && list.length === 0);
 }
 
 // The status line, on the shop page (above the grid) and the product page:
-// "Loading…", an error, or the result count
+// "Loading…" or the result count. It hides the "Try again" button.
 export function renderProductsStatus(message: string): void {
-  getElement("product-status", HTMLParagraphElement).textContent = message;
+  renderStatusLine("product-status", message, "normal");
+  showStatusButton("product-status", "retry", false);
+}
+
+// Loading failed: the message, and the "Try again" button under it
+export function renderProductsError(message: string): void {
+  renderStatusLine("product-status", message, "error");
+  showStatusButton("product-status", "retry", true);
 }
 
 // The tab title, and the summary that search engines and link previews read
@@ -120,7 +151,9 @@ export function renderProductPage({ product, related }: ProductPageView): void {
   getElement("product-category", HTMLParagraphElement).textContent = product.category;
   getElement("product-name", HTMLHeadingElement).textContent = product.name;
   getElement("product-price", HTMLParagraphElement).textContent = formatMoney(product.price);
-  getElement("product-add", HTMLButtonElement).dataset.id = String(product.id);
+  const add = getElement("product-add", HTMLButtonElement);
+  add.dataset.id = String(product.id);
+  add.setAttribute("aria-label", `Add to cart: ${product.name}`); // like the cards
   getElement("product-detail", HTMLElement).hidden = false;
 
   getElement("related-category", HTMLElement).textContent = product.category;
@@ -142,10 +175,24 @@ function bindAddButtons(container: HTMLElement, onAdd: (id: number) => void): vo
 // Listeners are added once, here. renderProducts only rebuilds children,
 // so one click is always one call, however often the products were redrawn.
 export function bindProductEvents(handlers: ProductsHandlers): void {
-  getElement("search", HTMLInputElement).addEventListener("input", handlers.onFiltersChange);
+  const search = getElement("search", HTMLInputElement);
+  search.addEventListener("input", handlers.onFiltersChange);
   getElement("category-filter", HTMLSelectElement).addEventListener("change", handlers.onFiltersChange);
   getElement("sort", HTMLSelectElement).addEventListener("change", handlers.onFiltersChange);
   bindAddButtons(getElement("product-grid", HTMLDivElement), handlers.onAdd);
+
+  // Shown by renderProducts when nothing matches. Afterwards the button is
+  // gone, so keyboard focus goes to the search box, ready for a new search.
+  addStatusButton("product-status", "clear", "Clear filters", () => {
+    handlers.onClearFilters();
+    search.focus();
+  });
+}
+
+// Shop and product page: the "Try again" button that renderProductsError shows.
+// Call once, before loading.
+export function bindProductsRetry(onRetry: () => void): void {
+  addStatusButton("product-status", "retry", "Try again", onRetry);
 }
 
 // Product page: the product's own button (renderProductPage gives it the id)

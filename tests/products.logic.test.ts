@@ -1,19 +1,25 @@
 // Tests for the pure product functions: checking API data, reading the
-// filter controls, search, category filter, sort, and the product page
-// (the id from the address bar, "More in <category>").
+// filter controls and the filters in the address bar, search, category
+// filter, sort, and the product page (the id from the address bar,
+// "More in <category>").
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  DEFAULT_FILTERS,
   filterProducts,
   findProduct,
   getRelatedProducts,
+  getSearchWords,
   isProduct,
   parseCategory,
+  parseFilterQuery,
+  parseFilters,
   parseProductId,
   parseSortKey,
   sortProducts,
+  toFilterQuery,
 } from "../src/modules/products/products.logic.ts";
-import type { Category, Product } from "../src/modules/products/products.types.ts";
+import type { Category, Filters, Product } from "../src/modules/products/products.types.ts";
 
 function product(
   id: number,
@@ -34,6 +40,23 @@ const PRODUCTS: readonly Product[] = Object.freeze([
   product(7, "Hand Bag", "Bags", 25, "products/hand-bag.svg"),
   product(2, "Canvas Backpack", "Bags", 49, "products/canvas-backpack.svg"),
   product(8, "Silver Watch", "Accessories", 150, "products/silver-watch.svg"),
+]);
+
+// Every entry of public/api/products.json, frozen
+const ALL: readonly Product[] = Object.freeze([
+  product(1, "Leather Tote Bag", "Bags", 89, "products/leather-tote-bag.svg"),
+  product(2, "Canvas Backpack", "Bags", 49, "products/canvas-backpack.svg"),
+  product(3, "Mini Crossbody Bag", "Bags", 39, "products/mini-crossbody-bag.svg"),
+  product(4, "White Sneakers", "Shoes", 75, "products/white-sneakers.svg"),
+  product(5, "Running Shoes", "Shoes", 110, "products/running-shoes.svg"),
+  product(6, "Suede Loafers", "Shoes", 95, "products/suede-loafers.svg"),
+  product(7, "Hand Bag", "Bags", 25, "products/hand-bag.svg"),
+  product(8, "Silver Watch", "Accessories", 150, "products/silver-watch.svg"),
+  product(9, "Sunglasses", "Accessories", 35, "products/sunglasses.svg"),
+  product(10, "Travel Duffel Bag", "Bags", 120, "products/travel-duffel-bag.svg"),
+  product(11, "Rain Boots", "Shoes", 60, "products/rain-boots.svg"),
+  product(12, "Leather Belt", "Accessories", 30, "products/leather-belt.svg"),
+  product(13, "Leather Wallet", "Accessories", 45, "products/leather-wallet.svg"),
 ]);
 
 const ids = (list: readonly Product[]): number[] => list.map((item) => item.id);
@@ -128,6 +151,120 @@ describe("parseSortKey", () => {
   });
 });
 
+describe("getSearchWords", () => {
+  test("splits on any spaces and ignores case", () => {
+    assert.deepEqual(getSearchWords("Leather Bag"), ["leather", "bag"]);
+    assert.deepEqual(getSearchWords("  leather \t\n  BAG  "), ["leather", "bag"]);
+  });
+
+  test("an empty query or only spaces gives no words", () => {
+    assert.deepEqual(getSearchWords(""), []);
+    assert.deepEqual(getSearchWords(" \t\n "), []);
+  });
+});
+
+describe("parseFilters", () => {
+  test("checks the category and sort, and keeps the search text as typed", () => {
+    assert.deepEqual(parseFilters({ query: " tote ", category: "Shoes", sortKey: "name-asc" }), {
+      query: " tote ",
+      category: "Shoes",
+      sortKey: "name-asc",
+    });
+  });
+
+  test("an unknown category or sort gives the default", () => {
+    assert.deepEqual(parseFilters({ query: "", category: "Hats", sortKey: "cheapest" }), DEFAULT_FILTERS);
+  });
+});
+
+describe("DEFAULT_FILTERS", () => {
+  test("is no search, every category, default order, and frozen", () => {
+    assert.deepEqual(DEFAULT_FILTERS, { query: "", category: "all", sortKey: "default" });
+    assert.equal(Object.isFrozen(DEFAULT_FILTERS), true);
+  });
+});
+
+describe("parseFilterQuery", () => {
+  test("reads q, category and sort", () => {
+    assert.deepEqual(parseFilterQuery("?q=tote&category=Bags&sort=price-asc"), {
+      query: "tote",
+      category: "Bags",
+      sortKey: "price-asc",
+    });
+  });
+
+  test("works with or without the leading ?, in any order", () => {
+    assert.deepEqual(parseFilterQuery("sort=name-asc&category=Shoes"), {
+      query: "",
+      category: "Shoes",
+      sortKey: "name-asc",
+    });
+  });
+
+  test("nothing in the address gives the defaults", () => {
+    assert.deepEqual(parseFilterQuery(""), DEFAULT_FILTERS);
+    assert.deepEqual(parseFilterQuery("?"), DEFAULT_FILTERS);
+    assert.deepEqual(parseFilterQuery("?id=3&utm_source=mail"), DEFAULT_FILTERS);
+  });
+
+  test("an unknown category or sort gives the default", () => {
+    for (const search of ["?category=bags", "?category=Hats", "?category=", "?category", "?category=all"]) {
+      assert.equal(parseFilterQuery(search).category, "all", `for ${search}`);
+    }
+    for (const search of ["?sort=PRICE-ASC", "?sort=cheapest", "?sort=", "?sort=default"]) {
+      assert.equal(parseFilterQuery(search).sortKey, "default", `for ${search}`);
+    }
+  });
+
+  test("decodes the search text and drops the spaces around it", () => {
+    assert.equal(parseFilterQuery("?q=leather+bag").query, "leather bag");
+    assert.equal(parseFilterQuery("?q=%20%20leather%20bag%20").query, "leather bag");
+    assert.equal(parseFilterQuery("?q=a%26b%3Dc").query, "a&b=c");
+    assert.equal(parseFilterQuery("?q=").query, "");
+  });
+
+  test("a value given twice uses the first one", () => {
+    assert.deepEqual(parseFilterQuery("?q=tote&q=belt&category=Shoes&category=Bags"), {
+      query: "tote",
+      category: "Shoes",
+      sortKey: "default",
+    });
+  });
+});
+
+describe("toFilterQuery", () => {
+  test("the defaults give an empty query: just shop.html", () => {
+    assert.equal(toFilterQuery(DEFAULT_FILTERS), "");
+    assert.equal(toFilterQuery({ query: "   ", category: "all", sortKey: "default" }), "");
+  });
+
+  test("leaves out defaults and keeps the order q, category, sort", () => {
+    assert.equal(
+      toFilterQuery({ query: "leather bag", category: "Bags", sortKey: "price-asc" }),
+      "?q=leather+bag&category=Bags&sort=price-asc",
+    );
+    assert.equal(toFilterQuery({ query: "", category: "Shoes", sortKey: "default" }), "?category=Shoes");
+    assert.equal(toFilterQuery({ query: "", category: "all", sortKey: "name-asc" }), "?sort=name-asc");
+  });
+
+  test("trims the search text and encodes characters that mean something in a link", () => {
+    assert.equal(toFilterQuery({ query: "  tote ", category: "all", sortKey: "default" }), "?q=tote");
+    assert.equal(toFilterQuery({ query: "a&b=c#d", category: "all", sortKey: "default" }), "?q=a%26b%3Dc%23d");
+  });
+
+  test("parseFilterQuery reads back the same filters", () => {
+    const cases: Filters[] = [
+      { query: "", category: "all", sortKey: "default" },
+      { query: "leather bag", category: "Bags", sortKey: "price-asc" },
+      { query: "a&b=c#d?e+f", category: "Accessories", sortKey: "price-desc" },
+      { query: "Größe 42", category: "Shoes", sortKey: "name-asc" },
+    ];
+    for (const filters of cases) {
+      assert.deepEqual(parseFilterQuery(toFilterQuery(filters)), filters);
+    }
+  });
+});
+
 describe("findProduct", () => {
   test("finds a product by id", () => {
     assert.equal(findProduct(PRODUCTS, 9)?.name, "Sunglasses");
@@ -154,17 +291,41 @@ describe("filterProducts", () => {
 
   test("search ignores case", () => {
     assert.deepEqual(ids(filterProducts(PRODUCTS, "LEATHER", "all")), [1]);
-    assert.deepEqual(ids(filterProducts(PRODUCTS, "bag", "all")), [1, 7]);
-    assert.deepEqual(ids(filterProducts(PRODUCTS, "BaG", "all")), [1, 7]);
+    assert.deepEqual(ids(filterProducts(PRODUCTS, "bag", "all")), [1, 7, 2]); // 2 is in Bags
+    assert.deepEqual(ids(filterProducts(PRODUCTS, "BaG", "all")), [1, 7, 2]);
   });
 
   test("search trims spaces around the query", () => {
     assert.deepEqual(ids(filterProducts(PRODUCTS, "  watch  ", "all")), [8]);
   });
 
-  test("search looks at the name only, not the category", () => {
-    assert.deepEqual(ids(filterProducts(PRODUCTS, "shoes", "all")), [5]); // "Running Shoes"
-    assert.deepEqual(filterProducts(PRODUCTS, "accessories", "all"), []);
+  test("search also looks at the category", () => {
+    assert.deepEqual(ids(filterProducts(ALL, "shoes", "all")), [4, 5, 6, 11]);
+    assert.deepEqual(ids(filterProducts(ALL, "Bags", "all")), [1, 2, 3, 7, 10]);
+    assert.deepEqual(ids(filterProducts(ALL, "accessories", "all")), [8, 9, 12, 13]);
+  });
+
+  test("every word must match, in any order, with any spaces between", () => {
+    assert.deepEqual(ids(filterProducts(ALL, "leather bag", "all")), [1]);
+    assert.deepEqual(ids(filterProducts(ALL, "bag leather", "all")), [1]);
+    assert.deepEqual(ids(filterProducts(ALL, "  Leather \t  BAG ", "all")), [1]);
+    assert.deepEqual(ids(filterProducts(ALL, "leather accessories", "all")), [12, 13]);
+    assert.deepEqual(filterProducts(ALL, "leather shoes", "all"), []);
+  });
+
+  test("a plural finds the singular and the other way round", () => {
+    assert.deepEqual(ids(filterProducts(ALL, "shoe", "all")), [4, 5, 6, 11]);
+    assert.deepEqual(ids(filterProducts(ALL, "wallets", "all")), [13]);
+    assert.deepEqual(ids(filterProducts(ALL, "watches", "all")), [8]);
+    assert.deepEqual(ids(filterProducts(ALL, "accessory", "all")), [8, 9, 12, 13]);
+    assert.deepEqual(ids(filterProducts(ALL, "leather bags", "all")), [1]);
+    assert.deepEqual(ids(filterProducts(ALL, "boot", "all")), [11]);
+  });
+
+  test("part of a word matches, so results appear while typing", () => {
+    assert.deepEqual(ids(filterProducts(ALL, "lea", "all")), [1, 12, 13]);
+    assert.deepEqual(ids(filterProducts(ALL, "leather wal", "all")), [13]);
+    assert.deepEqual(ids(filterProducts(ALL, "glasses", "all")), [9]); // in "Sunglasses"
   });
 
   test("filters by category", () => {
@@ -173,8 +334,10 @@ describe("filterProducts", () => {
   });
 
   test("combines search and category", () => {
-    assert.deepEqual(ids(filterProducts(PRODUCTS, "bag", "Bags")), [1, 7]);
+    assert.deepEqual(ids(filterProducts(PRODUCTS, "bag", "Bags")), [1, 7, 2]);
     assert.deepEqual(filterProducts(PRODUCTS, "bag", "Accessories"), []);
+    assert.deepEqual(ids(filterProducts(ALL, "leather", "Accessories")), [12, 13]);
+    assert.deepEqual(filterProducts(ALL, "shoes", "Bags"), []);
   });
 
   test("returns an empty list when nothing matches", () => {
@@ -262,23 +425,6 @@ describe("parseProductId", () => {
 });
 
 describe("getRelatedProducts", () => {
-  // Every entry of public/api/products.json, frozen
-  const ALL: readonly Product[] = Object.freeze([
-    product(1, "Leather Tote Bag", "Bags", 89, "products/leather-tote-bag.svg"),
-    product(2, "Canvas Backpack", "Bags", 49, "products/canvas-backpack.svg"),
-    product(3, "Mini Crossbody Bag", "Bags", 39, "products/mini-crossbody-bag.svg"),
-    product(4, "White Sneakers", "Shoes", 75, "products/white-sneakers.svg"),
-    product(5, "Running Shoes", "Shoes", 110, "products/running-shoes.svg"),
-    product(6, "Suede Loafers", "Shoes", 95, "products/suede-loafers.svg"),
-    product(7, "Hand Bag", "Bags", 25, "products/hand-bag.svg"),
-    product(8, "Silver Watch", "Accessories", 150, "products/silver-watch.svg"),
-    product(9, "Sunglasses", "Accessories", 35, "products/sunglasses.svg"),
-    product(10, "Travel Duffel Bag", "Bags", 120, "products/travel-duffel-bag.svg"),
-    product(11, "Rain Boots", "Shoes", 60, "products/rain-boots.svg"),
-    product(12, "Leather Belt", "Accessories", 30, "products/leather-belt.svg"),
-    product(13, "Leather Wallet", "Accessories", 45, "products/leather-wallet.svg"),
-  ]);
-
   const get = (id: number): Product => {
     const found = findProduct(ALL, id);
     assert.ok(found, `no product ${id} in the test data`);

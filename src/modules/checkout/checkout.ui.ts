@@ -1,6 +1,7 @@
 // Draws the demo checkout (order summary, empty state, confirmation) and
 // reports a valid form submit to main.ts. Nothing is sent: this site is a demo.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
+import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
 import type { CartLine } from "../cart/cart.types.ts";
 import type {
   CheckoutConfirmation,
@@ -33,9 +34,22 @@ function itemsText(count: number): string {
   return count === 1 ? "1 item" : `${count} items`;
 }
 
-// The line under the heading: "Loading…" or an error. Empty once the page is drawn.
+// The line under the heading: "Loading…", or empty once the page is drawn.
+// It hides the "Try again" button.
 export function renderCheckoutStatus(message: string): void {
-  getElement("checkout-status", HTMLParagraphElement).textContent = message;
+  renderStatusLine("checkout-status", message, "normal");
+  showStatusButton("checkout-status", "retry", false);
+}
+
+// Loading failed: the message, and the "Try again" button under it
+export function renderCheckoutError(message: string): void {
+  renderStatusLine("checkout-status", message, "error");
+  showStatusButton("checkout-status", "retry", true);
+}
+
+// The "Try again" button that renderCheckoutError shows. Call once, before loading.
+export function bindCheckoutRetry(onRetry: () => void): void {
+  addStatusButton("checkout-status", "retry", "Try again", onRetry);
 }
 
 // The form and the order summary, or the empty state when the cart is empty

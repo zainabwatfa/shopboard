@@ -11,7 +11,8 @@ src/
 │   └── ui/
 │       ├── toast.ts        showToast()
 │       ├── dom.ts          getElement, formatMoney, createImage
-│       └── page.ts         getCurrentPage(), getQueryParam()
+│       ├── page.ts         getCurrentPage(), getQueryParam(), getQueryString(), replaceQueryString()
+│       └── status.ts       status lines (data-state), "Try again" / "Clear filters" buttons
 ├── modules/                one folder per feature
 │   ├── products/
 │   │   ├── products.types.ts   the shape of a product
@@ -87,6 +88,11 @@ main.startShop()
   (if loading fails: ApiError ─► main ─► a clear message instead of "Loading")
 ```
 
+- Filters live in the URL: on load, `products.logic.parseFilterQuery(page.getQueryString())` fills the controls; every change writes `toFilterQuery(filters)` back with `replaceQueryString` (no extra Back steps). Unknown values fall back to `DEFAULT_FILTERS`.
+- Search: `filterProducts` splits the query into words (`getSearchWords`); every word must appear in the name or the category, ignoring case, word order and simple plurals.
+- No results: `shared/ui/status` shows **Clear filters** ─► `main.clearFilters` ─► default filters, then the search box gets focus.
+- Load error (shop, product, cart, checkout): the status line shows the message with **Try again** ─► `main.loadPage` loads again without a page reload.
+
 **Adding a product**
 ```
 click ─► products.ui ─► main.onAdd
@@ -104,7 +110,10 @@ main.startCart() ─► load the products (same path as above)
   ─► cart.ui.renderCart
   ─► cartPageReady = true
 click + / − / Remove / Clear ─► cart.ui ─► main ─► cart.state ─► draw again
+  ─► cart.ui.renderCartChange   (a polite live region says what changed, e.g. "Silver Watch removed from your cart. Cart total $89.00.")
 ```
+
+- **Clear cart** asks for confirmation first (`confirm()` in `cart.ui.ts`); `main.onClear` only runs after OK.
 
 **Home page: the register form (demo)**
 ```
@@ -161,7 +170,7 @@ main.startTheme()
   ─► theme.state.getThemeChoice ─► theme.ui.applyTheme + renderThemeChoice
 new choice ─► theme.ui.bindThemeEvents ─► main.onChange
   ─► theme.logic.parseThemeChoice ─► theme.state.saveThemeChoice ─► theme.ui.applyTheme
-another tab changed the theme ─► theme.ui.bindThemeSync ─► show it again
+another tab changed the theme, or Back/Forward showed the page (pageshow) ─► theme.ui.bindThemeSync ─► show it again
 ```
 
 - `data-theme="dark"` or `"light"` overrides the device setting. Without `data-theme` (System) the site follows the device setting.

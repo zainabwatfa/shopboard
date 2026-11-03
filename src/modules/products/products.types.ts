@@ -22,9 +22,18 @@ export type RawFilters = {
   sortKey: string;
 };
 
+// The same three, checked: what the shop page searches, filters and sorts by.
+// Also what the address bar holds: shop.html?q=tote&category=Bags&sort=price-asc
+export type Filters = {
+  query: string;
+  category: CategoryFilter;
+  sortKey: SortKey;
+};
+
 // What products.ui.ts calls when the user does something on the shop page
 export type ProductsHandlers = {
   onFiltersChange: () => void;
+  onClearFilters: () => void; // the "Clear filters" button shown when nothing matches
   onAdd: (id: number) => void;
 };
 

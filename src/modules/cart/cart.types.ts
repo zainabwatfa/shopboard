@@ -20,10 +20,18 @@ export type CartView = {
   total: number;
 };
 
-// What cart.ui.ts calls when the user does something on the cart page
+// What cart.ui.ts calls when the user does something on the cart page.
+// onClear is only called once the user has confirmed it.
 export type CartHandlers = {
   onIncrease: (id: number) => void;
   onDecrease: (id: number) => void;
   onRemove: (id: number) => void;
   onClear: () => void;
 };
+
+// What just changed on the cart page, so cart.ui.ts can say it to screen
+// reader users (they don't see a row change). name is the product's name.
+export type CartChange =
+  | { type: "quantity"; name: string; qty: number }
+  | { type: "removed"; name: string }
+  | { type: "cleared" };
