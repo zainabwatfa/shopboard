@@ -73,7 +73,9 @@
 
 /* Dark tokens. They apply when Dark is chosen, or when the device is dark and
    Light is not chosen. CSS can't put a selector and a media query in one rule,
-   so this block is written twice: keep both copies identical. */
+   so this block is written twice: keep both copies identical.
+   --color-line is the only edge of fields and round buttons (they have the card
+   colour inside), so it keeps at least 3:1 against card (3.35:1) and surface (3.74:1). */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --color-surface: #15111a;
@@ -85,7 +87,7 @@
   --color-ash: #a99cb2;
   --color-hairline: #3a3042;
   --color-hairline-2: #4a3f53;
-  --color-line: #6b5a7c;
+  --color-line: #7a6890;
   --color-shadow: #9e5ecf;
   --color-panel: #2c2433;
   --color-panel-line: #4f4459;
@@ -106,7 +108,7 @@
     --color-ash: #a99cb2;
     --color-hairline: #3a3042;
     --color-hairline-2: #4a3f53;
-    --color-line: #6b5a7c;
+    --color-line: #7a6890;
     --color-shadow: #9e5ecf;
     --color-panel: #2c2433;
     --color-panel-line: #4f4459;
@@ -154,8 +156,10 @@
   box-sizing: border-box;
 }
 
+/* The header only sticks where it fits on one row (see "Header sticks" below).
+   Where it scrolls away, a small gap is enough above a focused or linked element. */
 html {
-  scroll-padding-top: 5.5rem;
+  scroll-padding-top: 1rem;
 }
 
 body {
@@ -180,6 +184,12 @@ h2 {
   letter-spacing: -0.015em;
   color: var(--color-ink);
   text-wrap: balance;
+  /* A word too long for a phone screen breaks instead of making the page scroll
+     sideways: with a hyphen (long words only), or anywhere as a last resort.
+     From 30rem every heading word fits, so hyphens are off there. */
+  overflow-wrap: break-word;
+  hyphens: auto;
+  hyphenate-limit-chars: 12 5 5;
 }
 
 h3 {
@@ -347,14 +357,13 @@ a.button[href^="https://"]::after {
   text-align: center;
 }
 
+/* On phones and short screens the header wraps to 2 or 3 rows, so it scrolls
+   away with the page instead of covering what has the keyboard focus. It becomes
+   sticky from 40rem wide and 30rem tall, where it is one row (see the end of
+   "Larger screens"). */
 .site-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   border-bottom: 2px solid var(--color-line);
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
+  background: var(--color-surface);
 }
 
 .header-inner {
@@ -369,7 +378,7 @@ a.button[href^="https://"]::after {
 
 /* Phone sizes are tight: logo + nav share a row from about 370px, and the nav
    wraps below that. On phones the theme switch goes on the next row, on the right
-   (at 360px it shares that row with the nav). */
+   (at 360px it shares that row with the nav). All in one row from 40rem. */
 .logo {
   display: inline-flex;
   align-items: center;
@@ -659,6 +668,18 @@ a.button[href^="https://"]::after {
   box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--st-shade);
 }
 
+/* Each tile links to its product page. Like a button, it lifts on hover (see
+   "Motion") and its shadow grows; the tile in use comes to the front. */
+a.hero-tile:hover,
+a.hero-tile:focus-visible {
+  z-index: 1;
+  box-shadow: calc(var(--st-shadow-lg) + 3px) calc(var(--st-shadow-lg) + 3px) 0 var(--st-shade);
+}
+
+a.hero-tile:active {
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--st-shade);
+}
+
 /* The radius only shows on photos (the SVG pictures have see-through corners) */
 .hero-tile img {
   width: 100%;
@@ -856,11 +877,63 @@ textarea:user-invalid {
   box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0 var(--color-shadow);
 }
 
+/* The status line of the shop, product, cart and checkout pages. "Loading…" and
+   the result count stay this quiet mono line. */
 .status {
   margin: 0 0 1.25rem;
   font: 400 0.8125rem/1.5 var(--font-mono);
   letter-spacing: 0.02em;
   color: var(--color-smoke);
+}
+
+/* Empty and error states: the line becomes a card. shared/ui/status.ts puts a
+   button box (.status-action, hidden until needed) right after the line:
+   "Clear filters" (id ending in -clear) makes it the empty state (dashed, quiet),
+   "Try again" (id ending in -retry) the error state (solid red edge, pink wash).
+   data-state="empty" or "error" on the line does the same without a button. */
+.status[data-state="empty"],
+.status[data-state="error"],
+.status:has(~ .status-action:not([hidden])) {
+  padding: 2rem 1.5rem;
+  border: 2px dashed var(--color-hairline-2);
+  border-radius: var(--st-radius-sm);
+  background: var(--color-surface);
+  font: 700 1.0625rem/1.45 var(--font-sans);
+  letter-spacing: normal;
+  text-align: center;
+  color: var(--color-ink);
+}
+
+.status[data-state="error"],
+.status:has(~ .status-action[id$="-retry"]:not([hidden])) {
+  border-style: solid;
+  border-color: var(--color-down);
+  background: color-mix(in srgb, var(--color-st-pink) 22%, var(--color-card));
+}
+
+/* With a button, the line and the box under it are drawn as one card */
+.status:has(~ .status-action:not([hidden])) {
+  margin-bottom: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 0;
+  border-radius: var(--st-radius-sm) var(--st-radius-sm) 0 0;
+}
+
+.status-action:not([hidden]) {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+  padding: 0.5rem 1.5rem 2rem;
+  border: 2px dashed var(--color-hairline-2);
+  border-top: 0;
+  border-radius: 0 0 var(--st-radius-sm) var(--st-radius-sm);
+  background: var(--color-surface);
+}
+
+.status-action[id$="-retry"]:not([hidden]) {
+  border-style: solid;
+  border-color: var(--color-down);
+  background: color-mix(in srgb, var(--color-st-pink) 22%, var(--color-card));
 }
 
 .product-grid {
@@ -1010,8 +1083,11 @@ textarea:user-invalid {
   padding-bottom: 4rem;
 }
 
+/* minmax(0, 1fr): a long name or price wraps inside the column instead of
+   making the column (and the page) wider than the screen */
 .cart-layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
   margin-top: 1.5rem;
@@ -1051,14 +1127,18 @@ textarea:user-invalid {
   list-style: none;
 }
 
-/* Each row is a small sticker card */
+/* Each row is a small sticker card. On phones the line total goes under the
+   name and the − / + / Remove controls get their own full-width row, so the row
+   fits in 320px even with a long name or a total like $12,345.00. From 30rem the
+   total moves up next to the name (see "Larger screens"). */
 .cart-item {
   display: grid;
-  grid-template-columns: 4.5rem 1fr auto;
+  grid-template-columns: 4.5rem minmax(0, 1fr) auto;
   grid-template-areas:
-    "thumb name line"
+    "thumb name name"
     "thumb unit unit"
-    "thumb qty remove";
+    "thumb line line"
+    "qty qty remove";
   gap: 0.25rem 0.875rem;
   align-items: center;
   padding: 0.875rem;
@@ -1086,6 +1166,7 @@ textarea:user-invalid {
   font-size: 1.0625rem;
   font-weight: 600;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .cart-unit {
@@ -1096,9 +1177,10 @@ textarea:user-invalid {
 
 .cart-line {
   grid-area: line;
+  margin-top: 0.25rem;
   font: 900 1.25rem/1 var(--font-poster);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 .cart-qty {
@@ -1109,7 +1191,8 @@ textarea:user-invalid {
   margin-top: 0.5rem;
 }
 
-.cart-qty span {
+/* The number only: the visually hidden "Quantity" inside it keeps its 1px size */
+.cart-qty > span {
   min-width: 1.75rem;
   font: 700 1rem/1 var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -1141,11 +1224,16 @@ textarea:user-invalid {
   outline-offset: 2px;
 }
 
-/* Remove as a link-style button with a pink underline */
+/* Remove and Clear cart as quiet link-style buttons with a pink underline, so
+   the things that delete don't look like the main actions */
 .cart-item .cart-remove {
   grid-area: remove;
   justify-self: end;
   margin-top: 0.5rem;
+}
+
+.cart-item .cart-remove,
+.cart-summary .cart-clear {
   padding: 0.5rem 0.25rem;
   border-color: transparent;
   background: transparent;
@@ -1158,9 +1246,16 @@ textarea:user-invalid {
 }
 
 .cart-item .cart-remove:hover,
-.cart-item .cart-remove:active {
+.cart-item .cart-remove:active,
+.cart-summary .cart-clear:hover,
+.cart-summary .cart-clear:active {
   color: var(--color-down);
   box-shadow: none;
+}
+
+/* Centred under the summary's buttons, with its 3rem tap height kept */
+.cart-summary .cart-clear {
+  align-self: center;
 }
 
 /* `hidden` must win, so only set display when the summary is shown */
@@ -1180,11 +1275,13 @@ textarea:user-invalid {
   font-size: 2rem;
 }
 
+/* A total too wide to share the row wraps under its label */
 .cart-summary p {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: 0.25rem 1rem;
   margin: 0;
 }
 
@@ -1202,6 +1299,7 @@ textarea:user-invalid {
 .cart-total-row strong {
   font: 900 2rem/1 var(--font-poster);
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 /* The demo note sits in a recessed well so it reads as a notice */
@@ -1482,9 +1580,10 @@ textarea:user-invalid {
   line-height: 1.5;
 }
 
+/* Tighter cells on phones, so a 3-column table fits in 320px (roomier from 40rem) */
 .prose th,
 .prose td {
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 0.5rem;
   text-align: left;
   vertical-align: top;
 }
@@ -1503,7 +1602,15 @@ textarea:user-invalid {
 
 .prose tbody th {
   font-weight: 400;
-  white-space: nowrap;
+}
+
+/* Credits: the photo thumbnails, smaller on phones */
+.credits-table img {
+  width: 3rem;
+  height: 3rem;
+  border: 1.5px solid var(--color-hairline-2);
+  border-radius: var(--st-radius-xs);
+  object-fit: cover;
 }
 
 /* FAQ accordion: small sticker cards, the question in mono with a ▸ that
@@ -1640,7 +1747,9 @@ textarea:user-invalid {
   .cart-qty .button:active,
   .toast-close:active,
   .cart-item .cart-remove:hover,
-  .cart-item .cart-remove:active {
+  .cart-item .cart-remove:active,
+  .cart-summary .cart-clear:hover,
+  .cart-summary .cart-clear:active {
     transform: none;
   }
 
@@ -1717,6 +1826,21 @@ textarea:user-invalid {
     animation: drop-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
+  .hero-tile {
+    transition:
+      transform 0.15s var(--ease),
+      box-shadow 0.15s var(--ease);
+  }
+
+  a.hero-tile:hover,
+  a.hero-tile:focus-visible {
+    transform: translate(-3px, -3px);
+  }
+
+  a.hero-tile:active {
+    transform: translate(3px, 3px);
+  }
+
   .hero-tile--2 {
     animation-delay: 0.12s;
   }
@@ -1761,6 +1885,11 @@ textarea:user-invalid {
 }
 
 @media (min-width: 30rem) {
+  h1,
+  h2 {
+    hyphens: manual;
+  }
+
   .header-inner {
     column-gap: 1rem;
   }
@@ -1791,6 +1920,19 @@ textarea:user-invalid {
     border-radius: 50%;
     background: currentColor;
   }
+
+  /* Cart rows: the line total next to the name, − / + and Remove under the price */
+  .cart-item {
+    grid-template-areas:
+      "thumb name line"
+      "thumb unit unit"
+      "thumb qty remove";
+  }
+
+  .cart-line {
+    margin-top: 0;
+    text-align: right;
+  }
 }
 
 @media (min-width: 40rem) {
@@ -1804,9 +1946,15 @@ textarea:user-invalid {
     justify-self: start;
   }
 
+  /* Search on its own row, Category and Sort side by side: in three columns
+     "All categories" was cut off below about 800px. Three columns from 62.5rem. */
   .filters {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 1.5rem;
+  }
+
+  .filters > .field:first-child {
+    grid-column: 1 / -1;
   }
 
   .product-grid {
@@ -1856,6 +2004,20 @@ textarea:user-invalid {
   .footer-card {
     padding: 2.25rem;
   }
+
+  .prose th,
+  .prose td {
+    padding: 0.75rem 1rem;
+  }
+
+  .prose tbody th {
+    white-space: nowrap;
+  }
+
+  .credits-table img {
+    width: 4rem;
+    height: 4rem;
+  }
 }
 
 @media (min-width: 48rem) {
@@ -1896,6 +2058,14 @@ textarea:user-invalid {
     padding-top: 4rem;
   }
 
+  .filters {
+    grid-template-columns: minmax(0, 2fr) repeat(2, minmax(12.5rem, 1fr));
+  }
+
+  .filters > .field:first-child {
+    grid-column: auto;
+  }
+
   /* Name on the left, the three link groups on the right */
   .footer-card {
     grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
@@ -1910,7 +2080,29 @@ textarea:user-invalid {
     grid-template-columns: minmax(0, 1fr) 22rem;
     gap: 2.5rem;
   }
+}
 
+/* Header sticks: only where it is one row (from 40rem) and the screen is tall
+   enough (30rem) for it to cover little. It is then 3.75rem + its 2px border tall;
+   scroll-padding keeps a focused or linked element 1rem below it. */
+@media (min-width: 40rem) and (min-height: 30rem) {
+  html {
+    scroll-padding-top: calc(4.75rem + 2px);
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+}
+
+/* The cart summary sticks next to the list only where all of it fits on screen
+   under the header, so its last button can always be scrolled to */
+@media (min-width: 62.5rem) and (min-height: 45rem) {
   .cart-summary:not([hidden]) {
     position: sticky;
     top: 6rem;
@@ -2057,6 +2249,7 @@ a.product-media {
 /* `hidden` must win, so only set display when the layout is shown */
 .checkout-layout:not([hidden]) {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
   align-items: start;
 }
@@ -2097,12 +2290,14 @@ a.product-media {
   border-bottom: 1.5px solid var(--color-hairline-2);
 }
 
+/* On phones the line total goes under the name; from 30rem it sits on the right */
 .checkout-line {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
   grid-template-areas:
-    "thumb name total"
-    "thumb qty qty";
+    "thumb name"
+    "thumb qty"
+    "thumb total";
   gap: 0.125rem 0.75rem;
   align-items: center;
 }
@@ -2121,6 +2316,7 @@ a.product-media {
   grid-area: name;
   font-weight: 600;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .checkout-line-qty {
@@ -2133,7 +2329,7 @@ a.product-media {
   grid-area: total;
   font: 900 1.125rem/1 var(--font-poster);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  overflow-wrap: anywhere;
 }
 
 /* Confirmation: a card with a green shadow. `hidden` must win, as above. */
@@ -2166,9 +2362,10 @@ a.product-media {
 
 .checkout-row {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 1rem;
+  gap: 0.25rem 1rem;
   margin: 0;
 }
 
@@ -2200,6 +2397,17 @@ a.product-media {
 @media (min-width: 30rem) {
   .field-row {
     grid-template-columns: 3fr 2fr;
+  }
+
+  .checkout-line {
+    grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+    grid-template-areas:
+      "thumb name total"
+      "thumb qty qty";
+  }
+
+  .checkout-line-total {
+    text-align: right;
   }
 
   .product-detail-body .button {
