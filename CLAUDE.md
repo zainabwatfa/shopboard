@@ -25,7 +25,8 @@ src/
 │   └── ui/
 │       ├── toast.ts        showToast()
 │       ├── dom.ts          getElement, formatMoney, createImage
-│       └── page.ts         getCurrentPage()
+│       ├── page.ts         getCurrentPage(), getQueryParam(), query string read/replace
+│       └── status.ts       status lines with data-state, "Try again" / "Clear filters" buttons
 ├── modules/                one folder per feature, with everything it needs
 │   ├── products/
 │   │   ├── products.types.ts
@@ -37,6 +38,13 @@ src/
 │   │   ├── cart.state.ts
 │   │   ├── cart.logic.ts
 │   │   └── cart.ui.ts
+│   ├── checkout/
+│   │   ├── checkout.types.ts
+│   │   ├── checkout.logic.ts
+│   │   └── checkout.ui.ts
+│   ├── contact/
+│   │   ├── contact.types.ts
+│   │   └── contact.ui.ts
 │   ├── register/
 │   │   ├── register.types.ts
 │   │   └── register.ui.ts
@@ -80,22 +88,33 @@ Make a new folder: `modules/wishlist/` with `wishlist.types.ts`, `wishlist.state
 | Page | `<body data-page>` | What it shows |
 |---|---|---|
 | `index.html` | `home` | Hero, features, demo register form (sends nothing: a valid submit shows a toast and resets the form) |
-| `shop.html` | `shop` | Search, filter, sort, product cards; after "Add to cart", a toast with a **View cart** button |
-| `cart.html` | `cart` | Cart rows (+ / − / Remove), summary with a demo note (no checkout, no payment), Clear cart |
+| `shop.html` | `shop` | Search (every word must match the name or category), filter, sort, product cards; filters live in the URL (`shop.html?category=Bags&q=tote&sort=price-asc`); after "Add to cart", a toast with a **View cart** button |
+| `cart.html` | `cart` | Cart rows (+ / − / Remove), summary with a demo note, **Checkout (demo)**, Clear cart |
+| `product.html` | `product` | One product from `?id=N` (picture, category, name, price, Add to cart) and "More in <category>"; a clear message for a missing or unknown id |
+| `checkout.html` | `checkout` | Demo checkout: order summary and a delivery form, no payment fields. A valid submit shows a confirmation and clears the cart; nothing is charged or shipped |
+| `contact.html` | `contact` | Demo contact form (sends nothing: toast and reset); real questions go to GitHub Issues |
+| `about.html` | `about` | What the demo is, how it's built, link to the code |
+| `faq.html` | `faq` | Questions about the demo, as `<details>` |
+| `shipping-returns.html` | `shipping` | Nothing ships; what a real shop would explain here |
+| `privacy.html` | `privacy` | What the site really stores (the two `localStorage` keys) and the third parties (Google Fonts, GitHub Pages) |
+| `terms.html` | `terms` | Demo terms: nothing for sale, MIT code, Pexels photos |
+| `credits.html` | `credits` | Photo credits for the Pexels photos (also in `CREDITS.md`) |
+| `404.html` | `notfound` | Not-found page GitHub Pages shows for a missing URL |
 
-- Every page loads `src/styles.css` and `src/main.ts`. `main.ts` reads `data-page` and only starts what that page has.
+- Every page loads `src/styles.css` and `src/main.ts`. `main.ts` reads `data-page` and only starts what that page has; a missing or unknown `data-page` starts only the theme and the cart badge.
+- The site is a demo for a course. Page content must stay true about that: no invented company, address, phone, people or policies presented as real.
 - `*.ui.ts` files look elements up inside each function, because each page has different elements.
-- Shop and cart pages show "Loading…" while products load, and a clear message if loading fails.
-- The header (logo, nav, cart badge, theme switch) is repeated in each HTML file. Change all three together, and move `aria-current="page"` to the right link.
+- Shop, product, cart and checkout pages show "Loading…" while products load, and a clear message with a **Try again** button if loading fails (it retries without reloading the page). No results on the shop page shows a **Clear filters** button.
+- The header (logo, nav, cart badge, theme switch) is repeated in each HTML file. Change every page together, and move `aria-current="page"` to the right link (pages that aren't in the main nav have none).
 - Each HTML `<head>` has a small inline script that reads the saved theme (`shopboard-theme`) and sets `<html data-theme>` before the page is drawn, so it never flashes the wrong theme. It is repeated in each HTML file and must use the same key as `theme.state.ts`. It is the only code outside `src/`.
-- The footer, with "Demo shop for a course: no real orders or payments.", is repeated in each HTML file too. Change all three together.
+- The footer (Shop, Help and About links, and "Demo shop for a course: no real orders or payments.") is repeated in each HTML file too. Change every page together.
 - A new page must also be added to `vite.config.ts`, or `npm run build` won't include it.
 
 ### Paths: no leading `/`
 
 GitHub Pages serves the site under `/shopboard/`, not at the domain root, so a path that starts with `/` points outside the site.
 
-- Links and paths written by hand never start with `/`: `./`, `shop.html`, `cart.html`, `./#register` (HTML links and the toast's **View cart**), `api/products.json` (`products.api.ts`), `products/x.svg` (image paths in `products.json`).
+- Links and paths written by hand never start with `/`: `./`, `shop.html`, `cart.html`, `./#register` (HTML links and the toast's **View cart**), `api/products.json` (`products.api.ts`), `products/x.webp` or `products/x.svg` (image paths in `products.json`), `product.html?id=N`, `checkout.html`.
 - `vite.config.ts` sets `base: "./"`, so the built files point to each other with relative paths.
 - Exception: the `<script>`, `<link>` and `<img>` paths in the HTML (`/src/main.ts`, `/src/styles.css`, `/favicon.svg`, `/products/...`) keep their `/`. Vite rewrites those to relative paths when it builds.
 
@@ -116,11 +135,11 @@ GitHub Pages serves the site under `/shopboard/`, not at the domain root, so a p
 
 1. Put code where its job lives (see the tables above).
 2. `*.logic.ts` functions are pure: everything comes in as arguments, a new value goes out.
-3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `CartHandlers`, `RegisterHandlers`, `ThemeHandlers`).
+3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `ProductPageHandlers`, `CartHandlers`, `CheckoutHandlers`, `ContactHandlers`, `RegisterHandlers`, `ThemeHandlers`).
 4. Only `cart.state.ts` changes the cart. Everyone else calls `addToCart`, `changeQty`, `removeFromCart`, `clearCart`, `keepOnly`, `getCart`, `reloadCart`.
 5. `localStorage` holds text: `JSON.stringify` before saving, `JSON.parse` inside `try/catch` when loading, then `sanitizeCart`. The one exception is the theme: it is saved as plain text (`"light"` or `"dark"`; "system" removes the key) so the `<head>` script can read it without JSON, and `parseThemeChoice` checks whatever comes back.
 6. Every network call goes through `fetchJson`, and failures become an `ApiError` that `main.ts` turns into a message for the user.
-7. The cart stays in sync across tabs. Every change in `cart.state.ts` calls `reloadCart()` first, so it builds on what another tab saved; if the last save failed (`lastSaveFailed`), `reloadCart()` keeps the cart in memory, because it is newer. `bindCartSync` (`cart.ui.ts`) listens to the browser `storage` event, and to `pageshow` when Back/Forward shows the page from the browser's cache. `main.ts` calls it once on every page: then `reloadCart()`, and redraw the cart page (once `cartPageReady`) or only the badge.
+7. The cart stays in sync across tabs. Every change in `cart.state.ts` calls `reloadCart()` first, so it builds on what another tab saved; if the last save failed (`lastSaveFailed`), `reloadCart()` keeps the cart in memory, because it is newer. `bindCartSync` (`cart.ui.ts`) listens to the browser `storage` event, and to `pageshow` when Back/Forward shows the page from the browser's cache. `main.ts` calls it once on every page: then `reloadCart()`, and redraw the cart page (once `cartPageReady`), the checkout summary (once `checkoutPageReady`, and not after the confirmation is showing), or only the badge.
 8. The theme switch (System / Light / Dark) is on every page. `theme.ui.ts` sets `<html data-theme="light|dark">`, or removes it for System; the CSS applies the dark tokens for `data-theme="dark"`, or for the device's dark setting when `data-theme` is not `"light"`. Only `theme.state.ts` saves the choice; `bindThemeSync` brings a choice made in another tab.
 
 ### Boundary check (run after any change to `src/`)

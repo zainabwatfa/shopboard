@@ -26,10 +26,19 @@ export function bindThemeEvents(handlers: ThemeHandlers): void {
   });
 }
 
-// The browser fires "storage" in the other open tabs of this site when saved
-// data changes, so a theme picked in one tab reaches the others. Call once.
+// Shows the saved theme again when it may differ from what the page shows.
+// Call once.
+// - "storage": the browser fires it in the other open tabs of this site when
+//   saved data changes, so a theme picked in one tab reaches the others.
+// - "pageshow": after Back or Forward, the browser may put back the radio that
+//   was checked on the last visit (just before "pageshow", after this file
+//   already checked the right one), or show the page from its cache as it was.
+//   Either way the switch could show "System" on a dark page.
 export function bindThemeSync(onChange: () => void): void {
   window.addEventListener("storage", () => {
+    onChange();
+  });
+  window.addEventListener("pageshow", () => {
     onChange();
   });
 }
