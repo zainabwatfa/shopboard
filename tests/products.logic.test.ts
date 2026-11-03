@@ -248,7 +248,7 @@ describe("parseProductId", () => {
   });
 
   test("anything that is not only digits gives null", () => {
-    const bad = ["", "   ", "abc", "3abc", "abc3", "1.5", "1.0", "-2", "+3", "1e2", "0x10", "3 4", "Infinity", "NaN", "١"];
+    const bad = ["", "   ", "abc", "3abc", "abc3", "1.5", "1.0", "-2", "+3", "1e2", "0x10", "3 4", "Infinity", "NaN", "\u0661"]; // "\u0661" is the Arabic-Indic digit one
     for (const value of bad) {
       assert.equal(parseProductId(value), null, `for ${JSON.stringify(value)}`);
     }

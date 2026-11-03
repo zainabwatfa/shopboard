@@ -45,7 +45,8 @@ describe("getFirstName", () => {
   });
 
   test("keeps letters from any language and punctuation inside a word", () => {
-    assert.equal(getFirstName("زينب وطفة"), "زينب");
+    // An Arabic name ("Sara Ahmad"), written as escapes so this file stays in English
+    assert.equal(getFirstName("\u0633\u0627\u0631\u0629 \u0623\u062d\u0645\u062f"), "\u0633\u0627\u0631\u0629");
     assert.equal(getFirstName("Jean-Luc Picard"), "Jean-Luc");
     assert.equal(getFirstName("O'Neil"), "O'Neil");
   });
