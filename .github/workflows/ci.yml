@@ -1,5 +1,5 @@
-# Checks every push and pull request: the types must be correct and the
-# site must build. Nothing is deployed here (see deploy.yml).
+# Checks every push and pull request: the types must be correct, the tests
+# must pass and the site must build. Nothing is deployed here (see deploy.yml).
 name: CI
 
 on:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   check:
-    name: Typecheck and build
+    name: Typecheck, test and build
     runs-on: ubuntu-latest
     steps:
       - name: Check out the code
@@ -29,6 +29,9 @@ jobs:
 
       - name: Check types
         run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
 
       - name: Build
         run: npm run build

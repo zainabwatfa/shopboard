@@ -85,12 +85,36 @@ export function renderCart({ lines, count, total }: CartView): void {
   getElement("cart-total", HTMLElement).textContent = formatMoney(total);
 }
 
+// A redraw rebuilds the rows and can hide the summary. If the element that had
+// keyboard focus is gone or hidden now, focus the same button in the new rows,
+// or the cart heading if that row is gone. Does nothing when focus is still fine.
+function keepFocus(previous: Element | null): void {
+  if (!(previous instanceof HTMLElement)) return;
+  if (previous.isConnected && !previous.closest("[hidden]")) return;
+  const { action, id } = previous.dataset;
+  const same =
+    action && id
+      ? document.querySelector<HTMLElement>(
+          `#cart-list button[data-action="${action}"][data-id="${id}"]`,
+        )
+      : null;
+  (same ?? document.getElementById("cart-title"))?.focus();
+}
+
 // The browser fires "storage" in the other open tabs of this site when saved
 // data changes. This file doesn't know which data is the cart, so every change
 // is reported. Call once, on every page (the header badge is on every page).
 export function bindCartSync(onChange: () => void): void {
-  window.addEventListener("storage", () => {
+  const sync = (): void => {
+    const focused = document.activeElement;
     onChange();
+    keepFocus(focused);
+  };
+  window.addEventListener("storage", sync);
+  // Back or Forward can show this page from the browser's cache, exactly as it
+  // was when the user left it, so the cart may have changed since
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) sync();
   });
 }
 

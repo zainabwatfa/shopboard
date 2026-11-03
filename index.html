@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="ShopBoard: bags, shoes and accessories. Search, filter and keep your cart between visits." />
+    <meta name="description" content="ShopBoard is a demo shop built for a course. Browse bags, shoes and accessories and keep a cart on your device. No real orders or payments." />
+    <meta property="og:title" content="ShopBoard" />
+    <meta property="og:description" content="ShopBoard is a demo shop built for a course. Browse bags, shoes and accessories and keep a cart on your device. No real orders or payments." />
+    <meta property="og:type" content="website" />
     <title>ShopBoard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap"
     />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
@@ -21,7 +24,7 @@
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="logo" href="/" aria-label="ShopBoard home">
+        <a class="logo" href="./" aria-label="ShopBoard home">
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <path
               d="M4 9a5 5 0 0 1 5-5h9.6a3 3 0 0 1 2.1.9l7.4 7.4a3 3 0 0 1 0 4.2l-9.6 9.6a3 3 0 0 1-4.2 0L4.9 18.7A3 3 0 0 1 4 16.6z"
@@ -34,10 +37,10 @@
         </a>
         <nav aria-label="Main">
           <ul class="nav-list">
-            <li><a href="/" aria-current="page">Home</a></li>
-            <li><a href="/shop.html">Shop</a></li>
+            <li><a href="./" aria-current="page">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
             <li>
-              <a href="/cart.html">
+              <a href="cart.html">
                 Cart <span id="cart-count" class="badge" aria-live="polite">0</span>
               </a>
             </li>
@@ -57,8 +60,8 @@
               waits for you until you're ready.
             </p>
             <div class="hero-actions">
-              <a class="button" href="/shop.html">Shop the collection</a>
-              <a class="button button-secondary" href="#register">Create an account</a>
+              <a class="button" href="shop.html">Shop the collection</a>
+              <a class="button button-secondary" href="#register">Try the demo form</a>
             </div>
           </div>
 
@@ -105,12 +108,12 @@
       <section id="register" class="join" aria-labelledby="register-title">
         <div class="container join-inner">
           <div class="join-copy">
-            <p class="eyebrow">Members</p>
+            <p class="eyebrow">Demo form</p>
             <h2 id="register-title">Join <em>ShopBoard</em></h2>
-            <p>Create an account to start shopping. Fields marked with * are required.</p>
+            <p>This is a demo form for a course: nothing you type is sent or saved. Fields marked with * are required.</p>
           </div>
 
-          <form class="register-form" action="#" method="post">
+          <form id="register-form" class="register-form">
             <div class="field">
               <label for="full-name">Full name *</label>
               <input
@@ -135,31 +138,12 @@
             </div>
 
             <div class="field">
-              <label for="password">Password *</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autocomplete="new-password"
-                required
-                minlength="8"
-                aria-describedby="password-hint"
-              />
-              <p id="password-hint" class="hint">At least 8 characters.</p>
-            </div>
-
-            <div class="field">
               <label for="account-type">Account type *</label>
               <select id="account-type" name="accountType" required>
                 <option value="">Choose one…</option>
                 <option value="buyer">Buyer</option>
                 <option value="seller">Seller</option>
               </select>
-            </div>
-
-            <div class="field field-check">
-              <input id="terms" name="terms" type="checkbox" required />
-              <label for="terms">I agree to the terms of use *</label>
             </div>
 
             <button class="button" type="submit">Create account</button>
@@ -169,13 +153,19 @@
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-inner">
-        <p>&copy; 2026 ShopBoard</p>
-        <ul class="footer-links">
-          <li><a href="/shop.html">Shop</a></li>
-          <li><a href="/cart.html">Cart</a></li>
-          <li><a href="/#register">Join</a></li>
-        </ul>
+      <div class="container footer-card">
+        <p class="footer-name">ShopBoard</p>
+        <nav aria-label="Footer">
+          <ul class="footer-links">
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="./#register">Join</a></li>
+          </ul>
+        </nav>
+        <p class="footer-bar">
+          <span>&copy; 2026 ShopBoard</span>
+          <span>Demo shop for a course: no real orders or payments.</span>
+        </p>
       </div>
     </footer>
 

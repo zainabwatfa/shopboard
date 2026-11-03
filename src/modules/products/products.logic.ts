@@ -16,6 +16,7 @@ export function isProduct(value: unknown): value is Product {
     typeof category === "string" &&
     categories.includes(category) &&
     typeof price === "number" &&
+    Number.isFinite(price) && // JSON like 1e999 parses to Infinity
     price >= 0 &&
     typeof image === "string"
   );
