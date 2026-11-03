@@ -3,7 +3,11 @@
    pastel tint + darker shade pairs, paper backgrounds, poster headings. */
 
 /* ---------- Tokens ---------- */
+/* Theme: <html data-theme> is set by the theme switch (theme.ui.ts) and by the
+   small script in each HTML <head>. "light" or "dark" override the device
+   setting; no data-theme (System) follows the device. */
 :root {
+  /* System: native controls and scrollbars follow the device */
   color-scheme: light dark;
 
   /* Fonts (loaded from Google Fonts in each HTML head) */
@@ -62,8 +66,37 @@
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Light chosen in the switch: the light tokens above, even on a dark device */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* Dark tokens. They apply when Dark is chosen, or when the device is dark and
+   Light is not chosen. CSS can't put a selector and a media query in one rule,
+   so this block is written twice: keep both copies identical. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-surface: #15111a;
+  --color-surface-grid: #1a1520;
+  --color-paper: #1d1723;
+  --color-card: #221b29;
+  --color-ink: #f5eeee;
+  --color-smoke: #c3b8cc;
+  --color-ash: #a99cb2;
+  --color-hairline: #3a3042;
+  --color-hairline-2: #4a3f53;
+  --color-line: #6b5a7c;
+  --color-shadow: #9e5ecf;
+  --color-panel: #2c2433;
+  --color-panel-line: #4f4459;
+  --color-accent: #d6a6f5;
+  --color-down: #ff8a8a;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  /* Same as :root[data-theme="dark"] above */
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --color-surface: #15111a;
     --color-surface-grid: #1a1520;
     --color-paper: #1d1723;
@@ -200,6 +233,22 @@ a {
   top: 1rem;
 }
 
+/* Hidden on screen, still read by screen readers and voice control.
+   The theme switch radios use it too, so they stay focusable. */
+.visually-hidden,
+.theme-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .container {
   width: min(100% - 2.5rem, 80rem);
   margin-inline: auto;
@@ -313,7 +362,9 @@ a.button::after {
   padding-block: 0.5rem;
 }
 
-/* Phone sizes are tight so logo + nav fit on one row at 360px+; it wraps below that */
+/* Phone sizes are tight: logo + nav share a row from about 370px, and the nav
+   wraps below that. On phones the theme switch goes on the next row, on the right
+   (at 360px it shares that row with the nav). */
 .logo {
   display: inline-flex;
   align-items: center;
@@ -398,6 +449,79 @@ a.button::after {
   font: 700 0.75rem/1 var(--font-mono);
   font-variant-numeric: tabular-nums;
   box-shadow: 2px 2px 0 var(--color-line);
+}
+
+/* ---------- Theme switch (System / Light / Dark) ---------- */
+/* A pill with three round options. The radios are hidden (see .visually-hidden)
+   but still get the keyboard focus; each label is a round target, 40px on the
+   smallest phones and 44px from 24rem. */
+.theme-switch {
+  position: relative;
+  display: flex;
+  gap: 0;
+  min-width: 0;
+  margin: 0;
+  margin-inline-start: auto;
+  padding: 0;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-card);
+}
+
+/* The negative margins let each circle cover the pill's border, so the chosen
+   circle's outline lines up with the pill's outline */
+.theme-switch label {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-block: -2px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background-clip: padding-box;
+  color: var(--color-smoke);
+  cursor: pointer;
+}
+
+.theme-switch label:first-of-type {
+  margin-inline-start: -2px;
+}
+
+.theme-switch label:last-of-type {
+  margin-inline-end: -2px;
+}
+
+.theme-switch svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.theme-switch label:hover {
+  background-color: color-mix(in srgb, var(--color-st-lav) 30%, transparent);
+  color: var(--color-ink);
+}
+
+/* The chosen option: a lavender sticker circle, with an ink icon in both themes */
+.theme-switch input:checked + label {
+  border-color: var(--color-line);
+  background-color: var(--color-st-lav);
+  color: var(--color-on-fill);
+}
+
+/* The hidden radio has the focus, so its label shows the ring */
+.theme-switch input:focus-visible + label {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* High contrast mode removes the lavender fill, so mark the choice with system colours */
+@media (forced-colors: active) {
+  .theme-switch input:checked + label {
+    forced-color-adjust: none;
+    border-color: CanvasText;
+    background-color: Highlight;
+    color: HighlightText;
+  }
 }
 
 /* ---------- Page heading (shop + cart) ---------- */
@@ -1143,6 +1267,15 @@ select:user-invalid {
       box-shadow 0.12s var(--ease);
   }
 
+  /* Only while the switch is in use, so the saved choice (checked by main.ts
+     after the page is drawn) appears without animating on every page load */
+  .theme-switch:hover label,
+  .theme-switch:focus-within label {
+    transition:
+      background-color 0.15s var(--ease),
+      color 0.15s var(--ease);
+  }
+
   .cart-qty .button:hover,
   .toast-close:hover {
     transform: translate(-1px, -1px);
@@ -1245,6 +1378,18 @@ select:user-invalid {
 }
 
 /* ---------- Larger screens ---------- */
+/* From 384px there is room for 44px theme switch targets */
+@media (min-width: 24rem) {
+  .theme-switch {
+    gap: 0.125rem;
+  }
+
+  .theme-switch label {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
 @media (min-width: 30rem) {
   .header-inner {
     column-gap: 1rem;
@@ -1279,6 +1424,16 @@ select:user-invalid {
 }
 
 @media (min-width: 40rem) {
+  /* One row: logo on the left, nav in the middle, theme switch on the right */
+  .header-inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .logo {
+    justify-self: start;
+  }
+
   .filters {
     grid-template-columns: 2fr 1fr 1fr;
     padding: 1.5rem;

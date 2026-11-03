@@ -46,6 +46,15 @@ import {
 
 import { bindRegisterEvents } from "./modules/register/register.ui.ts";
 
+import { parseThemeChoice } from "./modules/theme/theme.logic.ts";
+import { getThemeChoice, saveThemeChoice } from "./modules/theme/theme.state.ts";
+import {
+  applyTheme,
+  bindThemeEvents,
+  bindThemeSync,
+  renderThemeChoice,
+} from "./modules/theme/theme.ui.ts";
+
 // Filled once the product list has loaded
 let products: readonly Product[] = [];
 
@@ -155,6 +164,29 @@ function startHome(): void {
   });
 }
 
+// Every page: show the saved theme in the header switch and keep it in step.
+// The <head> script already applied it before the page was drawn.
+function startTheme(): void {
+  const showSavedTheme = (): void => {
+    const choice = getThemeChoice();
+    applyTheme(choice);
+    renderThemeChoice(choice);
+  };
+  showSavedTheme();
+
+  bindThemeEvents({
+    onChange: (value) => {
+      const choice = parseThemeChoice(value);
+      saveThemeChoice(choice);
+      applyTheme(choice);
+    },
+  });
+
+  // A theme picked in another tab
+  bindThemeSync(showSavedTheme);
+}
+
+startTheme();
 refreshCount();
 
 // The cart changed in another tab, or Back brought this page back from the

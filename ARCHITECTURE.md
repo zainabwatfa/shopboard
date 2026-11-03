@@ -23,9 +23,14 @@ src/
 │   │   ├── cart.state.ts       السلة نفسها + localStorage + reloadCart
 │   │   ├── cart.logic.ts       العدد والإجمالي وتنظيف البيانات
 │   │   └── cart.ui.ts          صفحة السلة والرقم بالهيدر + bindCartSync
-│   └── register/
-│       ├── register.types.ts   شكل RegisterHandlers
-│       └── register.ui.ts      فورم التسجيل (demo): بيبلّغ main.ts عن الـ submit
+│   ├── register/
+│   │   ├── register.types.ts   شكل RegisterHandlers
+│   │   └── register.ui.ts      فورم التسجيل (demo): بيبلّغ main.ts عن الـ submit
+│   └── theme/
+│       ├── theme.types.ts      ThemeChoice و ThemeHandlers
+│       ├── theme.state.ts      اختيار الثيم + localStorage (نص عادي، مش JSON)
+│       ├── theme.logic.ts      parseThemeChoice: بيفحص القيمة
+│       └── theme.ui.ts         زر System / Light / Dark و <html data-theme>
 ├── main.ts                 بيشغّل التطبيق وبيوصل الـ modules
 └── styles.css              تصميم كل الصفحات
 ```
@@ -39,7 +44,7 @@ src/
 | `*.types.ts` | أشكال البيانات فقط. ما فيه كود بيشتغل |
 | `*.api.ts` | بيجيب البيانات من الشبكة عن طريق `fetchJson`، وبيفحصها |
 | `*.logic.ts` | دوال نقية: نفس المدخلات بتعطي نفس النتيجة، وما بتلمس الصفحة ولا التخزين ولا الشبكة |
-| `*.state.ts` | بيحفظ البيانات اللي بتتغير (السلة) في `localStorage` |
+| `*.state.ts` | بيحفظ البيانات اللي بتتغير (السلة واختيار الثيم) في `localStorage` |
 | `*.ui.ts` | بيرسم على الصفحة وبيبلّغ `main.ts` عن النقرات |
 | `shared/` | أدوات بتحتاجها أكثر من ميزة |
 | `main.ts` | بيقرر **إمتى** يصير كل شي: يحمّل المنتجات، يربط الأحداث، يرسم |
@@ -48,12 +53,12 @@ src/
 
 ```
                                    main.ts
-          ┌───────────────────────────┼────────────────┬───────────────┐
-          ▼                           ▼                ▼               ▼
-   modules/products ◄────────── modules/cart    modules/register    shared/
-          │  import type Product      │                │               ▲
-          └───────────────────────────┴────────────────┴───────────────┘
-                           كل module بيستخدم shared/
+          ┌───────────────────────────┼────────────────┬───────────────┬──────────────┐
+          ▼                           ▼                ▼               ▼              ▼
+   modules/products ◄────────── modules/cart    modules/register  modules/theme    shared/
+          │  import type Product      │                │               │              ▲
+          └───────────────────────────┴────────────────┴───────────────┴──────────────┘
+                                  كل module بيستخدم shared/
 ```
 
 1. `main.ts` بيستورد من الـ modules ومن `shared/`.
@@ -117,6 +122,19 @@ submit ─► register.ui                 (المتصفح ما بيبعته إل
 - `bindCartSync` بيسمع كمان لحدث `pageshow`: لما Back أو Forward بيرجّع الصفحة من الـ cache تبع المتصفح، بتصير نفس المزامنة، لأنه يمكن السلة تغيّرت من وقتها.
 - كل تغيير بـ `cart.state` (`addToCart` و `changeQty` و `removeFromCart` و `clearCart` و `keepOnly`) بيستدعي `reloadCart` أول شي، فالحفظ ما بيمسح شي حفظه تاب ثاني.
 - إذا آخر حفظ فشل (`lastSaveFailed`)، `reloadCart` ما بيعمل شي: النسخة اللي بالذاكرة أحدث من المحفوظة.
+
+**الثيم: System / Light / Dark (على كل صفحة)**
+```
+قبل ما تنرسم الصفحة ─► سكربت زغير بالـ <head>     (بيقرا "shopboard-theme" وبيحط <html data-theme>)
+main.startTheme()
+  ─► theme.state.getThemeChoice ─► theme.ui.applyTheme + renderThemeChoice
+اختيار جديد ─► theme.ui.bindThemeEvents ─► main.onChange
+  ─► theme.logic.parseThemeChoice ─► theme.state.saveThemeChoice ─► theme.ui.applyTheme
+تاب ثاني غيّر الثيم ─► theme.ui.bindThemeSync ─► نفس العرض من جديد
+```
+
+- `data-theme="dark"` أو `"light"` بيغلب إعداد الجهاز. بدون `data-theme` (System) الموقع بيمشي مع إعداد الجهاز.
+- الثيم محفوظ كنص عادي (`"light"` أو `"dark"`)، و System بيمسح المفتاح. هيك سكربت الـ `<head>` بيقرأه بدون JSON، وما بيصير وميض بالألوان.
 
 ## المسارات: بدون `/` بالأول
 
