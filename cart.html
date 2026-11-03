@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Your ShopBoard cart." />
+    <title>Cart · ShopBoard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body data-page="cart">
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="/" aria-label="ShopBoard home">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path
+              d="M4 9a5 5 0 0 1 5-5h9.6a3 3 0 0 1 2.1.9l7.4 7.4a3 3 0 0 1 0 4.2l-9.6 9.6a3 3 0 0 1-4.2 0L4.9 18.7A3 3 0 0 1 4 16.6z"
+              fill="currentColor"
+            />
+            <circle class="logo-cut" cx="10.5" cy="10.5" r="2.6" />
+            <path class="logo-cut" d="M13 20.5l6-6" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          ShopBoard
+        </a>
+        <nav aria-label="Main">
+          <ul class="nav-list">
+            <li><a href="/">Home</a></li>
+            <li><a href="/shop.html">Shop</a></li>
+            <li>
+              <a href="/cart.html" aria-current="page">
+                Cart <span id="cart-count" class="badge" aria-live="polite">0</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="container cart-page">
+      <div class="page-head">
+        <p class="eyebrow">Your bag</p>
+        <h1 id="cart-title" tabindex="-1">Your <em>cart</em></h1>
+      </div>
+
+      <p id="cart-status" class="status" aria-live="polite"></p>
+
+      <div id="cart-empty" class="cart-empty-state" hidden>
+        <p>Your cart is empty.</p>
+        <a class="button" href="/shop.html">Browse the shop</a>
+      </div>
+
+      <div class="cart-layout">
+        <ul id="cart-list" class="cart-list" aria-labelledby="cart-title"></ul>
+
+        <aside id="cart-summary" class="cart-summary" aria-labelledby="summary-title" hidden>
+          <h2 id="summary-title">Summary</h2>
+          <p>Items <span id="cart-items">0 items</span></p>
+          <p class="cart-total-row">Total <strong id="cart-total">$0.00</strong></p>
+          <button id="cart-clear" class="button button-secondary" type="button">Clear cart</button>
+          <a class="button" href="/shop.html">Continue shopping</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>&copy; 2026 ShopBoard</p>
+        <ul class="footer-links">
+          <li><a href="/shop.html">Shop</a></li>
+          <li><a href="/cart.html">Cart</a></li>
+          <li><a href="/#register">Join</a></li>
+        </ul>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
