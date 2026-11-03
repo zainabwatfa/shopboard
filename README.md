@@ -12,6 +12,7 @@ A demo online shop built for a course. It takes no real orders and no payments.
 - **Cart saved in your browser** (`localStorage`): change quantities with **+** / **−**, **Remove** a product, or **Clear cart**. The cart count in the header updates as you go.
 - **Toast** after "Add to cart" with a **View cart** button.
 - **Demo register form** on the home page. Nothing you type is sent or saved.
+- **Light and dark themes** with a **System / Light / Dark** switch in the header. System follows the device setting; the choice is saved in the browser and applied before the page is drawn, so it never flashes.
 
 ## Tech
 

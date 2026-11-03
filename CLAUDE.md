@@ -37,9 +37,14 @@ src/
 │   │   ├── cart.state.ts
 │   │   ├── cart.logic.ts
 │   │   └── cart.ui.ts
-│   └── register/
-│       ├── register.types.ts
-│       └── register.ui.ts
+│   ├── register/
+│   │   ├── register.types.ts
+│   │   └── register.ui.ts
+│   └── theme/
+│       ├── theme.types.ts
+│       ├── theme.state.ts
+│       ├── theme.logic.ts
+│       └── theme.ui.ts
 ├── main.ts                 starts the app, connects the modules
 └── styles.css              styles for every page
 ```
@@ -53,7 +58,7 @@ Product data is served as JSON from `public/api/products.json`; pictures live in
 | `*.types.ts` | The shapes of that feature's data. Types only, nothing runs. | any runtime code |
 | `*.api.ts` | Loads that feature's data through `fetchJson`, then checks it. | DOM, `localStorage`, calling `fetch` directly |
 | `*.logic.ts` | Pure functions: search, filter, sort, totals, checking data. | DOM, `localStorage`, network, changing its inputs |
-| `*.state.ts` | Owns data that changes and is saved (the cart), with `localStorage`. | DOM, network |
+| `*.state.ts` | Owns data that changes and is saved (the cart, the theme choice), with `localStorage`. | DOM, network |
 | `*.ui.ts` | Draws that feature on the page and reports clicks through handlers. | `localStorage`, network, logic |
 | `shared/api/client.ts` | The only file that talks to the network. | DOM, `localStorage` |
 | `shared/ui/*` | Page helpers any module can use. The only DOM code outside `*.ui.ts`. | `localStorage`, network |
@@ -81,7 +86,8 @@ Make a new folder: `modules/wishlist/` with `wishlist.types.ts`, `wishlist.state
 - Every page loads `src/styles.css` and `src/main.ts`. `main.ts` reads `data-page` and only starts what that page has.
 - `*.ui.ts` files look elements up inside each function, because each page has different elements.
 - Shop and cart pages show "Loading…" while products load, and a clear message if loading fails.
-- The header (logo, nav, cart badge) is repeated in each HTML file. Change all three together, and move `aria-current="page"` to the right link.
+- The header (logo, nav, cart badge, theme switch) is repeated in each HTML file. Change all three together, and move `aria-current="page"` to the right link.
+- Each HTML `<head>` has a small inline script that reads the saved theme (`shopboard-theme`) and sets `<html data-theme>` before the page is drawn, so it never flashes the wrong theme. It is repeated in each HTML file and must use the same key as `theme.state.ts`. It is the only code outside `src/`.
 - The footer, with "Demo shop for a course: no real orders or payments.", is repeated in each HTML file too. Change all three together.
 - A new page must also be added to `vite.config.ts`, or `npm run build` won't include it.
 
@@ -110,17 +116,18 @@ GitHub Pages serves the site under `/shopboard/`, not at the domain root, so a p
 
 1. Put code where its job lives (see the tables above).
 2. `*.logic.ts` functions are pure: everything comes in as arguments, a new value goes out.
-3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `CartHandlers`, `RegisterHandlers`).
+3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `CartHandlers`, `RegisterHandlers`, `ThemeHandlers`).
 4. Only `cart.state.ts` changes the cart. Everyone else calls `addToCart`, `changeQty`, `removeFromCart`, `clearCart`, `keepOnly`, `getCart`, `reloadCart`.
-5. `localStorage` holds text: `JSON.stringify` before saving, `JSON.parse` inside `try/catch` when loading, then `sanitizeCart`.
+5. `localStorage` holds text: `JSON.stringify` before saving, `JSON.parse` inside `try/catch` when loading, then `sanitizeCart`. The one exception is the theme: it is saved as plain text (`"light"` or `"dark"`; "system" removes the key) so the `<head>` script can read it without JSON, and `parseThemeChoice` checks whatever comes back.
 6. Every network call goes through `fetchJson`, and failures become an `ApiError` that `main.ts` turns into a message for the user.
 7. The cart stays in sync across tabs. Every change in `cart.state.ts` calls `reloadCart()` first, so it builds on what another tab saved; if the last save failed (`lastSaveFailed`), `reloadCart()` keeps the cart in memory, because it is newer. `bindCartSync` (`cart.ui.ts`) listens to the browser `storage` event, and to `pageshow` when Back/Forward shows the page from the browser's cache. `main.ts` calls it once on every page: then `reloadCart()`, and redraw the cart page (once `cartPageReady`) or only the badge.
+8. The theme switch (System / Light / Dark) is on every page. `theme.ui.ts` sets `<html data-theme="light|dark">`, or removes it for System; the CSS applies the dark tokens for `data-theme="dark"`, or for the device's dark setting when `data-theme` is not `"light"`. Only `theme.state.ts` saves the choice; `bindThemeSync` brings a choice made in another tab.
 
 ### Boundary check (run after any change to `src/`)
 
 ```
 grep -rlE "document|window" src --include=*.ts   # only *.ui.ts and shared/ui/*
-grep -rl "localStorage" src --include=*.ts       # only src/modules/cart/cart.state.ts
+grep -rl "localStorage" src --include=*.ts       # only *.state.ts (cart.state.ts, theme.state.ts)
 grep -rlE "\bfetch\(" src --include=*.ts         # only src/shared/api/client.ts
 ```
 
