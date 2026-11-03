@@ -1,7 +1,9 @@
 # ShopBoard
 
 A small online shop built with HTML, CSS and TypeScript (ES modules) on Vite.
+It is a demo for a course: no real orders or payments, and the register form sends nothing.
 Run it with `npm run dev` and open http://localhost:5173/. Opening `index.html` as a file does not work (module scripts are blocked on `file://`).
+Live on GitHub Pages: https://zainabwatfa.github.io/shopboard/. `.github/workflows/deploy.yml` builds and publishes it on every push to `main`; `.github/workflows/ci.yml` runs `typecheck` and `build` on every push and pull request.
 
 ## TypeScript
 
@@ -30,11 +32,14 @@ src/
 │   │   ├── products.api.ts
 │   │   ├── products.logic.ts
 │   │   └── products.ui.ts
-│   └── cart/
-│       ├── cart.types.ts
-│       ├── cart.state.ts
-│       ├── cart.logic.ts
-│       └── cart.ui.ts
+│   ├── cart/
+│   │   ├── cart.types.ts
+│   │   ├── cart.state.ts
+│   │   ├── cart.logic.ts
+│   │   └── cart.ui.ts
+│   └── register/
+│       ├── register.types.ts
+│       └── register.ui.ts
 ├── main.ts                 starts the app, connects the modules
 └── styles.css              styles for every page
 ```
@@ -69,15 +74,24 @@ Make a new folder: `modules/wishlist/` with `wishlist.types.ts`, `wishlist.state
 
 | Page | `<body data-page>` | What it shows |
 |---|---|---|
-| `index.html` | `home` | Hero, features, register form |
+| `index.html` | `home` | Hero, features, demo register form (sends nothing: a valid submit shows a toast and resets the form) |
 | `shop.html` | `shop` | Search, filter, sort, product cards; after "Add to cart", a toast with a **View cart** button |
-| `cart.html` | `cart` | Cart rows (+ / − / Remove), summary, Clear cart |
+| `cart.html` | `cart` | Cart rows (+ / − / Remove), summary with a demo note (no checkout, no payment), Clear cart |
 
 - Every page loads `src/styles.css` and `src/main.ts`. `main.ts` reads `data-page` and only starts what that page has.
 - `*.ui.ts` files look elements up inside each function, because each page has different elements.
 - Shop and cart pages show "Loading…" while products load, and a clear message if loading fails.
 - The header (logo, nav, cart badge) is repeated in each HTML file. Change all three together, and move `aria-current="page"` to the right link.
+- The footer, with "Demo shop for a course: no real orders or payments.", is repeated in each HTML file too. Change all three together.
 - A new page must also be added to `vite.config.ts`, or `npm run build` won't include it.
+
+### Paths: no leading `/`
+
+GitHub Pages serves the site under `/shopboard/`, not at the domain root, so a path that starts with `/` points outside the site.
+
+- Links and paths written by hand never start with `/`: `./`, `shop.html`, `cart.html`, `./#register` (HTML links and the toast's **View cart**), `api/products.json` (`products.api.ts`), `products/x.svg` (image paths in `products.json`).
+- `vite.config.ts` sets `base: "./"`, so the built files point to each other with relative paths.
+- Exception: the `<script>`, `<link>` and `<img>` paths in the HTML (`/src/main.ts`, `/src/styles.css`, `/favicon.svg`, `/products/...`) keep their `/`. Vite rewrites those to relative paths when it builds.
 
 ## Rules
 
@@ -96,10 +110,11 @@ Make a new folder: `modules/wishlist/` with `wishlist.types.ts`, `wishlist.state
 
 1. Put code where its job lives (see the tables above).
 2. `*.logic.ts` functions are pure: everything comes in as arguments, a new value goes out.
-3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `CartHandlers`).
-4. Only `cart.state.ts` changes the cart. Everyone else calls `addToCart`, `changeQty`, `removeFromCart`, `clearCart`, `keepOnly`, `getCart`.
+3. `*.ui.ts` files get data as arguments and report clicks through the handlers `main.ts` gives them (`ProductsHandlers`, `CartHandlers`, `RegisterHandlers`).
+4. Only `cart.state.ts` changes the cart. Everyone else calls `addToCart`, `changeQty`, `removeFromCart`, `clearCart`, `keepOnly`, `getCart`, `reloadCart`.
 5. `localStorage` holds text: `JSON.stringify` before saving, `JSON.parse` inside `try/catch` when loading, then `sanitizeCart`.
 6. Every network call goes through `fetchJson`, and failures become an `ApiError` that `main.ts` turns into a message for the user.
+7. The cart stays in sync across tabs. Every change in `cart.state.ts` calls `reloadCart()` first, so it builds on what another tab saved; if the last save failed (`lastSaveFailed`), `reloadCart()` keeps the cart in memory, because it is newer. `bindCartSync` (`cart.ui.ts`) listens to the browser `storage` event, and to `pageshow` when Back/Forward shows the page from the browser's cache. `main.ts` calls it once on every page: then `reloadCart()`, and redraw the cart page (once `cartPageReady`) or only the badge.
 
 ### Boundary check (run after any change to `src/`)
 

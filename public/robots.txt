@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zainabwatfa.github.io/shopboard/sitemap.xml
