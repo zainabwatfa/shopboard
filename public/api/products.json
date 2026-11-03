@@ -18,7 +18,7 @@
     "name": "Mini Crossbody Bag",
     "category": "Bags",
     "price": 39,
-    "image": "products/mini-crossbody-bag.svg"
+    "image": "products/mini-crossbody-bag.webp"
   },
   {
     "id": 4,
@@ -46,14 +46,14 @@
     "name": "Hand Bag",
     "category": "Bags",
     "price": 25,
-    "image": "products/hand-bag.svg"
+    "image": "products/hand-bag.webp"
   },
   {
     "id": 8,
     "name": "Silver Watch",
     "category": "Accessories",
     "price": 150,
-    "image": "products/silver-watch.svg"
+    "image": "products/silver-watch.webp"
   },
   {
     "id": 9,
