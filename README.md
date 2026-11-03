@@ -21,7 +21,7 @@ A demo online shop built for a course. It takes no real orders and no payments.
 
 ## Getting started
 
-You need [Node.js](https://nodejs.org/) 22 or newer (Vite 8 needs 22.12 or later on the 22 line).
+You need [Node.js](https://nodejs.org/) 22.18 or newer: Vite 8 needs 22.12+, and `npm test` runs the TypeScript test files directly, which needs 22.18+.
 
 ```sh
 npm install
@@ -38,6 +38,7 @@ Opening `index.html` directly as a file does not work: browsers block module scr
 |---|---|
 | `npm run dev` | Starts the Vite dev server at http://localhost:5173/. |
 | `npm run typecheck` | Runs `tsc` to check the types. It must print nothing. |
+| `npm test` | Runs the tests in `tests/` with Node's built-in test runner (no extra packages). |
 | `npm run build` | Runs `tsc`, then builds the site into `dist/`. A type error stops the build. |
 | `npm run preview` | Serves the built `dist/` locally so you can check it before deploying. |
 
@@ -62,8 +63,8 @@ public/
 
 The site is hosted on GitHub Pages.
 
-- Every push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). It runs `npm run build` and publishes `dist/`. You can also start it by hand from the **Actions** tab.
-- Every push and pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which runs `npm run typecheck` and `npm run build`.
+- Every push to `main` runs [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). It runs `npm test` and `npm run build`, then publishes `dist/`. You can also start it by hand from the **Actions** tab.
+- Every push and pull request runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml), which runs `npm run typecheck`, `npm test` and `npm run build`.
 
 **One-time setup:** in the GitHub repo, go to **Settings > Pages > Build and deployment > Source** and choose **GitHub Actions**.
 
