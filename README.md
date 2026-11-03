@@ -10,7 +10,11 @@ A demo online shop built for a course. It takes no real orders and no payments.
 - **Filter** by category (Bags, Shoes, Accessories).
 - **Sort** by price (low to high, high to low) or name (A to Z). "Default" brings back the original order.
 - **Cart saved in your browser** (`localStorage`): change quantities with **+** / **−**, **Remove** a product, or **Clear cart**. The cart count in the header updates as you go.
+- **Product pages** (`product.html?id=N`) with the picture, price, Add to cart and "More in <category>"; the shop cards link to them.
 - **Toast** after "Add to cart" with a **View cart** button.
+- **Demo checkout**: order summary and a delivery form with no payment fields. A valid submit shows a confirmation and empties the cart; nothing is charged or shipped.
+- **Store pages**: About, Contact (demo form), FAQ, Shipping & returns, Privacy, Terms, Photo credits and a 404 page. Their content says plainly that this is a demo.
+- **Product photos** are free photos from [Pexels](https://www.pexels.com/license/), cropped and converted to WebP; see [CREDITS.md](CREDITS.md).
 - **Demo register form** on the home page. Nothing you type is sent or saved.
 - **Light and dark themes** with a **System / Light / Dark** switch in the header. System follows the device setting; the choice is saved in the browser and applied before the page is drawn, so it never flashes.
 
@@ -46,7 +50,7 @@ Opening `index.html` directly as a file does not work: browsers block module scr
 ## Project structure
 
 ```
-index.html, shop.html, cart.html   the three pages
+*.html                             the pages (shop, product, cart, checkout, content pages, 404)
 src/
 ├── shared/      code every feature can use (network, toast, page helpers)
 ├── modules/     one folder per feature, with everything it needs

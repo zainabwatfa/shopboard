@@ -1,4 +1,4 @@
-/* Shared by every page (index.html, shop.html, cart.html).
+/* Shared by every page.
    "Sticker" look: 2px ink outlines, flat offset shadows (no blur),
    pastel tint + darker shade pairs, paper backgrounds, poster headings. */
 
@@ -312,9 +312,14 @@ a {
   box-shadow: 2px 2px 0 var(--btn-shade);
 }
 
-/* Links that take you somewhere get an arrow (hidden from screen readers) */
+/* Links that take you somewhere get an arrow (hidden from screen readers):
+   → inside the site, ↗ to another site */
 a.button::after {
   content: "→" / "";
+}
+
+a.button[href^="https://"]::after {
+  content: "↗" / "";
 }
 
 .button-secondary {
@@ -524,12 +529,24 @@ a.button::after {
   }
 }
 
-/* ---------- Page heading (shop + cart) ---------- */
+/* ---------- Page heading ---------- */
+/* .page-head: shop + cart. .page-hero: the content pages (about, FAQ, privacy…),
+   a <section> with a .container inside, followed by a .prose block. */
 .page-head {
   padding-block: 2.5rem 0.5rem;
 }
 
-.page-head h1 {
+.page-hero {
+  padding-block: 2.5rem 1.5rem;
+}
+
+/* The page you landed on by mistake (404) has no .prose after the hero */
+.page-hero:last-child {
+  padding-bottom: 4rem;
+}
+
+.page-head h1,
+.page-hero h1 {
   font-size: clamp(2.875rem, 6vw, 5.5rem);
   line-height: 0.94;
 }
@@ -539,6 +556,50 @@ a.button::after {
   font-size: 1.125rem;
   line-height: 1.45;
   color: var(--color-smoke);
+}
+
+/* Intro paragraph under a page title */
+.lede {
+  max-width: 35rem;
+  font-size: clamp(1.125rem, 1.7vw, 1.375rem);
+  line-height: 1.45;
+  color: var(--color-smoke);
+}
+
+/* "Last updated" line under a lede */
+.page-meta {
+  margin: 0;
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-smoke);
+}
+
+/* Links inside running text: ink text with a visible accent underline */
+.lede a,
+.hero-note a,
+.join-copy a,
+.prose a:not(.button) {
+  color: var(--color-ink);
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+
+.lede a:hover,
+.hero-note a:hover,
+.join-copy a:hover,
+.prose a:not(.button):hover {
+  color: var(--color-accent);
+}
+
+/* A row of buttons (content pages, call-to-action cards) */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.75rem;
 }
 
 /* ---------- Home: hero ---------- */
@@ -572,6 +633,14 @@ a.button::after {
   margin-top: 2rem;
 }
 
+/* Small line under the hero buttons that links to the About page */
+.hero-note {
+  margin: 1.75rem 0 0;
+  font: 400 0.8125rem/1.5 var(--font-mono);
+  letter-spacing: 0.02em;
+  color: var(--color-smoke);
+}
+
 .hero-art {
   position: relative;
   width: 100%;
@@ -590,9 +659,11 @@ a.button::after {
   box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--st-shade);
 }
 
+/* The radius only shows on photos (the SVG pictures have see-through corners) */
 .hero-tile img {
   width: 100%;
   height: 100%;
+  border-radius: var(--st-radius-xs);
   object-fit: contain;
 }
 
@@ -708,7 +779,8 @@ a.button::after {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   min-height: 3rem;
   padding: 0.75rem 1rem;
@@ -718,6 +790,12 @@ select {
   color: var(--color-ink);
   font: 400 1rem/1.4 var(--font-sans);
   appearance: none;
+}
+
+textarea {
+  min-height: 9rem;
+  line-height: 1.5;
+  resize: vertical;
 }
 
 /* Chevron drawn with two gradients, so it follows the text colour in both themes */
@@ -734,21 +812,24 @@ select {
   cursor: pointer;
 }
 
-input::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: var(--color-ash);
   opacity: 1;
 }
 
 /* Focus: lavender shadow. The transparent outline shows up in forced-colours mode. */
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid transparent;
   box-shadow: 4px 4px 0 var(--color-st-lav-shade);
 }
 
 /* Only flag fields after the user has typed something invalid */
 input:user-invalid,
-select:user-invalid {
+select:user-invalid,
+textarea:user-invalid {
   border-color: var(--color-down);
   box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-down);
 }
@@ -798,10 +879,12 @@ select:user-invalid {
   box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0 var(--st-shade);
 }
 
-/* Image well: a light wash of the card's tint (light in both themes) */
+/* Image well: a square with a light wash of the card's tint (light in both
+   themes), seen while a photo loads or behind see-through pictures. The picture
+   fills the square and is cropped to it; overflow keeps the corners round. */
 .product-media {
-  aspect-ratio: 1;
-  padding: 12%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
   border: 1.5px solid var(--color-hairline-2);
   border-radius: 10px;
   background: color-mix(in srgb, var(--st-tint) 45%, var(--color-st-paper));
@@ -810,7 +893,8 @@ select:user-invalid {
 .product-image {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
 }
 
 .product-body {
@@ -984,15 +1068,17 @@ select:user-invalid {
   box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0 var(--st-shade);
 }
 
+/* Same idea as the shop's image well: the picture fills the rounded square */
 .cart-thumb {
   grid-area: thumb;
   align-self: start;
   width: 4.5rem;
   height: 4.5rem;
-  padding: 0.375rem;
+  aspect-ratio: 1 / 1;
   border: 1.5px solid var(--color-hairline-2);
   border-radius: var(--st-radius-xs);
   background: color-mix(in srgb, var(--st-tint) 45%, var(--color-st-paper));
+  object-fit: cover;
 }
 
 .cart-name {
@@ -1157,7 +1243,9 @@ select:user-invalid {
   color: var(--color-smoke);
 }
 
-.register-form {
+/* The demo forms: register (home) and contact */
+.register-form,
+.contact-form {
   display: grid;
   gap: 1.25rem;
   padding: 1.5rem;
@@ -1167,18 +1255,21 @@ select:user-invalid {
   box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-pink-shade);
 }
 
-.register-form .button {
+.register-form .button,
+.contact-form .button {
   margin-top: 0.25rem;
 }
 
 /* ---------- Footer: dark panel card ---------- */
+/* Brand name, then three link groups (stacked on phones, side by side from
+   48rem, next to the name from 62.5rem), then the bottom bar. */
 .site-footer {
   padding-block: 3rem 2.5rem;
 }
 
 .footer-card {
   display: grid;
-  gap: 1.5rem;
+  gap: 2rem;
   padding: 1.75rem;
   border: 2px solid var(--color-line);
   border-radius: 32px;
@@ -1198,30 +1289,43 @@ select:user-invalid {
   letter-spacing: -0.015em;
 }
 
+.footer-nav {
+  display: grid;
+  gap: 1.75rem;
+}
+
+/* Group titles: mono, uppercase, lavender (h2 for the outline, small on screen) */
+.footer-heading {
+  margin: 0 0 0.5rem;
+  font: 400 0.75rem/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-st-lav);
+}
+
 .footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  gap: 0.125rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* 2.25rem tall, so each link is an easy tap target */
 .footer-links a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.5rem;
-  padding: 0 1rem;
-  border: 2px solid var(--color-panel-line);
-  border-radius: 999px;
+  min-height: 2.25rem;
   color: var(--color-on-panel);
-  font: 700 0.875rem/1 var(--font-sans);
+  font: 400 0.9375rem/1.3 var(--font-sans);
   text-decoration: none;
+  text-underline-offset: 0.25em;
 }
 
 .footer-links a:hover {
-  border-color: var(--color-st-lav);
   color: var(--color-st-lav);
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
 }
 
 .footer-bar {
@@ -1237,6 +1341,257 @@ select:user-invalid {
   color: var(--color-on-panel-muted);
 }
 
+/* ---------- Content pages: long-form text (.prose) ---------- */
+/* About, contact, FAQ, shipping, privacy, terms, credits. The hero text and the
+   prose share one reading width (about 68 characters a line), centred on wide
+   screens. max-width works with .container's width, so the gutters stay. */
+.page-hero > .container,
+.prose {
+  max-width: 42rem;
+}
+
+.prose {
+  padding-bottom: 4rem;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  overflow-wrap: break-word;
+}
+
+.prose h2 {
+  margin: 3rem 0 1rem;
+  font-size: clamp(1.875rem, 3.4vw, 2.625rem);
+  line-height: 1;
+}
+
+.prose h3 {
+  margin: 2rem 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose p,
+.prose ul,
+.prose ol {
+  margin: 0 0 1.25rem;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+}
+
+.prose li + li {
+  margin-top: 0.5rem;
+}
+
+.prose li::marker {
+  color: var(--color-accent);
+}
+
+/* Links that leave the site get an arrow (hidden from screen readers) */
+.prose a[href^="https://"]:not(.button)::after {
+  content: "↗" / "";
+  margin-left: 0.125em;
+}
+
+.prose code {
+  padding: 0.0625em 0.375em;
+  border: 1.5px solid var(--color-hairline-2);
+  border-radius: 6px;
+  background: var(--color-paper);
+  font: 400 0.875em/1.4 var(--font-mono);
+}
+
+/* The prose spacing above is for text, not for the form hints */
+.prose .hint {
+  margin: 0;
+}
+
+/* "This is a demo" note: a small yellow sticker card with a round "!" badge */
+.callout {
+  position: relative;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem 1rem 3.5rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius-sm);
+  background: color-mix(in srgb, var(--color-st-yellow) 22%, var(--color-card));
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-yellow-shade);
+}
+
+.callout::before {
+  content: "!" / "";
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-st-yellow);
+  color: var(--color-on-fill);
+  font: 700 0.875rem/1 var(--font-mono);
+}
+
+.callout > :last-child,
+.example > :last-child,
+.cta-card > :last-child {
+  margin-bottom: 0;
+}
+
+/* Example content (what a real shop would say): dashed and flat, so it reads
+   as "not the real thing", with a small mono tag on top */
+.example {
+  margin: 0 0 2rem;
+  padding: 1.25rem;
+  border: 2px dashed var(--color-hairline-2);
+  border-radius: var(--st-radius-sm);
+  background: var(--color-paper);
+}
+
+.example .example-label {
+  display: inline-block;
+  margin: 0 0 1rem;
+  padding: 0.25rem 0.75rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-card);
+  font: 400 0.75rem/1.4 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Tables scroll sideways inside their card if they don't fit */
+.table-wrap {
+  margin: 0 0 1.5rem;
+  overflow-x: auto;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius-sm);
+  background: var(--color-card);
+  box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0 var(--color-st-lav-shade);
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.prose th,
+.prose td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose thead th {
+  background: var(--color-paper);
+  font: 400 0.75rem/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-smoke);
+}
+
+.prose tbody tr {
+  border-top: 1px solid var(--color-hairline-2);
+}
+
+.prose tbody th {
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* FAQ accordion: small sticker cards, the question in mono with a ▸ that
+   turns when the answer is open */
+.prose details {
+  margin: 0 0 1rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius-xs);
+  background: var(--color-card);
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-shadow);
+}
+
+.prose summary {
+  position: relative;
+  display: block;
+  padding: 0.875rem 1rem 0.875rem 2.25rem;
+  border-radius: calc(var(--st-radius-xs) - 2px);
+  font: 700 0.875rem/1.45 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.prose summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose summary::before {
+  content: "▸" / "";
+  position: absolute;
+  top: 0.875rem;
+  left: 1rem;
+  color: var(--color-accent);
+}
+
+.prose summary:hover {
+  background: color-mix(in srgb, var(--color-st-lav) 22%, transparent);
+}
+
+.prose details[open] > summary {
+  border-bottom: 1.5px dashed var(--color-hairline-2);
+  border-radius: calc(var(--st-radius-xs) - 2px) calc(var(--st-radius-xs) - 2px) 0 0;
+}
+
+.prose details[open] > summary::before {
+  rotate: 90deg;
+}
+
+/* The answer: one <div> after the <summary> */
+.prose details > div {
+  padding: 1rem 1rem 0.25rem;
+}
+
+.prose details > div p {
+  margin-bottom: 0.875rem;
+}
+
+/* Call to action at the end of a page: a filled lavender sticker card.
+   Text on sticker fills is always ink, in both themes. */
+.cta-card {
+  margin-top: 3rem;
+  padding: 1.75rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius);
+  background: var(--color-st-lav);
+  color: var(--color-on-fill);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-lav-shade);
+}
+
+.prose .cta-card h2 {
+  margin-top: 0;
+  color: var(--color-on-fill);
+}
+
+.cta-card .button-row {
+  margin-top: 1.5rem;
+}
+
+.cta-card .button-secondary {
+  --btn-shade: var(--color-on-fill);
+}
+
+/* The accent purple is too close to lavender, so focus rings are ink here */
+.cta-card :focus-visible {
+  outline-color: var(--color-on-fill);
+}
+
 /* ---------- Motion (only for people who haven't asked for less) ---------- */
 @media (prefers-reduced-motion: no-preference) {
   html {
@@ -1246,7 +1601,8 @@ select:user-invalid {
   /* Press model: hover lifts up-left, active presses down-right */
   .button,
   input,
-  select {
+  select,
+  textarea {
     transition:
       transform 0.15s var(--ease),
       box-shadow 0.15s var(--ease);
@@ -1289,8 +1645,13 @@ select:user-invalid {
   }
 
   input:focus-visible,
-  select:focus-visible {
+  select:focus-visible,
+  textarea:focus-visible {
     transform: translate(-1px, -1px);
+  }
+
+  .prose summary::before {
+    transition: rotate 0.15s var(--ease);
   }
 
   .logo svg {
@@ -1305,8 +1666,9 @@ select:user-invalid {
     transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
+  /* A gentle zoom inside the well (the well crops it) */
   .product-card:hover .product-image {
-    transform: scale(1.06) rotate(-3deg);
+    transform: scale(1.05);
   }
 
   @keyframes rise {
@@ -1324,22 +1686,30 @@ select:user-invalid {
   }
 
   .hero-copy > *,
-  .page-head > * {
+  .page-head > *,
+  .page-hero .container > * {
     animation: rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .hero-copy > :nth-child(2),
-  .page-head > :nth-child(2) {
+  .page-head > :nth-child(2),
+  .page-hero .container > :nth-child(2) {
     animation-delay: 0.08s;
   }
 
   .hero-copy > :nth-child(3),
-  .page-head > :nth-child(3) {
+  .page-head > :nth-child(3),
+  .page-hero .container > :nth-child(3) {
     animation-delay: 0.16s;
   }
 
-  .hero-copy > :nth-child(4) {
+  .hero-copy > :nth-child(4),
+  .page-hero .container > :nth-child(4) {
     animation-delay: 0.24s;
+  }
+
+  .hero-copy > :nth-child(5) {
+    animation-delay: 0.32s;
   }
 
   .hero-tile,
@@ -1474,8 +1844,13 @@ select:user-invalid {
   }
 
   .register-form,
+  .contact-form,
   .cart-summary:not([hidden]) {
     padding: 2rem;
+  }
+
+  .cta-card {
+    padding: 2.25rem;
   }
 
   .footer-card {
@@ -1505,13 +1880,9 @@ select:user-invalid {
     gap: 4rem;
   }
 
-  .footer-card {
-    grid-template-columns: 1fr auto;
-    align-items: center;
-  }
-
-  .footer-bar {
-    grid-column: 1 / -1;
+  .footer-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
   }
 }
 
@@ -1520,8 +1891,19 @@ select:user-invalid {
     width: min(100% - 5rem, 80rem);
   }
 
-  .page-head {
+  .page-head,
+  .page-hero {
     padding-top: 4rem;
+  }
+
+  /* Name on the left, the three link groups on the right */
+  .footer-card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    column-gap: 2.5rem;
+  }
+
+  .footer-bar {
+    grid-column: 1 / -1;
   }
 
   .cart-layout {
@@ -1532,5 +1914,320 @@ select:user-invalid {
   .cart-summary:not([hidden]) {
     position: sticky;
     top: 6rem;
+  }
+}
+
+/* ---------- Product page & checkout ---------- */
+/* product.html, checkout.html, and the links on product cards (shop page and
+   "More in …" on the product page). Base styles for phones, wider screens below. */
+
+/* Product cards: the picture and the name open the product page */
+a.product-media {
+  display: block;
+}
+
+.product-link {
+  text-decoration: none;
+}
+
+.product-link:hover {
+  text-decoration-line: underline;
+  text-decoration-color: var(--color-st-pink-shade);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.product-page,
+.checkout-page {
+  padding-bottom: 4rem;
+}
+
+/* "Back to shop": a small ghost pill with an arrow (hidden from screen readers) */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  margin: 1.5rem 0 1.25rem;
+  padding: 0 1.125rem;
+  border: 2px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-card);
+  color: var(--color-ink);
+  font: 700 0.875rem/1 var(--font-sans);
+  text-decoration: none;
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-lav-shade);
+}
+
+.back-link::before {
+  content: "←" / "";
+}
+
+.back-link:hover {
+  box-shadow: calc(var(--st-shadow-sm) + 2px) calc(var(--st-shadow-sm) + 2px) 0 var(--color-st-lav-shade);
+}
+
+/* Product detail: picture first on phones, side by side on wider screens.
+   `hidden` must win, so only set display when it is shown. */
+.product-detail:not([hidden]) {
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+/* Big square sticker: tint wash inside, shade shadow outside */
+.product-detail-media {
+  width: 100%;
+  max-width: 34rem;
+  aspect-ratio: 1;
+  padding: 12%;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius);
+  background: color-mix(in srgb, var(--st-tint) 45%, var(--color-st-paper));
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--st-shade);
+}
+
+.product-detail-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.product-detail-body .eyebrow {
+  margin-bottom: 0.5rem;
+}
+
+.product-detail-body h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+  line-height: 0.94;
+  overflow-wrap: anywhere;
+}
+
+.product-detail-price {
+  margin: 0.75rem 0 1.25rem;
+  font: 900 2.5rem/1 var(--font-poster);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.product-detail-body .button {
+  width: 100%;
+}
+
+/* Not found: the dashed empty-state card, with a heading */
+.product-missing h1 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3rem);
+}
+
+.product-missing p {
+  max-width: 30rem;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-smoke);
+}
+
+/* "More in Bags" */
+.related {
+  margin-top: 4rem;
+}
+
+.related h2 {
+  margin-bottom: 1.5rem;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+}
+
+/* Checkout: the demo notice is a yellow sticker, so it can't be missed */
+.demo-note {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.5rem 0 1.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius-xs);
+  background: var(--color-st-yellow);
+  color: var(--color-on-fill);
+  font-weight: 700;
+  line-height: 1.4;
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-yellow-shade);
+}
+
+/* `hidden` must win, so only set display when the layout is shown */
+.checkout-layout:not([hidden]) {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+}
+
+.checkout-form {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius);
+  background: var(--color-card);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-pink-shade);
+}
+
+.checkout-form h2,
+.checkout-done h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+/* City + postal code: stacked on phones, side by side from 30rem */
+.field-row {
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Order lines, in the summary and in the confirmation */
+.checkout-lines {
+  display: grid;
+  gap: 0.875rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkout-summary .checkout-lines {
+  padding-bottom: 1rem;
+  border-bottom: 1.5px solid var(--color-hairline-2);
+}
+
+.checkout-line {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  grid-template-areas:
+    "thumb name total"
+    "thumb qty qty";
+  gap: 0.125rem 0.75rem;
+  align-items: center;
+}
+
+.checkout-thumb {
+  grid-area: thumb;
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 0.25rem;
+  border: 1.5px solid var(--color-hairline-2);
+  border-radius: var(--st-radius-xs);
+  background: color-mix(in srgb, var(--color-st-lav) 35%, var(--color-st-paper));
+}
+
+.checkout-line-name {
+  grid-area: name;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.checkout-line-qty {
+  grid-area: qty;
+  font: 400 0.8125rem/1.4 var(--font-mono);
+  color: var(--color-smoke);
+}
+
+.checkout-line-total {
+  grid-area: total;
+  font: 900 1.125rem/1 var(--font-poster);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Confirmation: a card with a green shadow. `hidden` must win, as above. */
+.checkout-done:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 40rem;
+  padding: 1.5rem;
+  border: 2px solid var(--color-line);
+  border-radius: var(--st-radius);
+  background: var(--color-card);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-green-shade);
+}
+
+.checkout-done h2 {
+  overflow-wrap: anywhere;
+}
+
+.checkout-done h3 {
+  margin: 0.5rem 0 0;
+}
+
+.checkout-done-lead {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.45;
+  color: var(--color-smoke);
+}
+
+.checkout-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin: 0;
+}
+
+.checkout-row > span {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+}
+
+.checkout-done .button {
+  align-self: flex-start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .back-link {
+    transition:
+      transform 0.15s var(--ease),
+      box-shadow 0.15s var(--ease);
+  }
+
+  .back-link:hover {
+    transform: translate(-2px, -2px);
+  }
+
+  .back-link:active {
+    transform: translate(2px, 2px);
+  }
+}
+
+@media (min-width: 30rem) {
+  .field-row {
+    grid-template-columns: 3fr 2fr;
+  }
+
+  .product-detail-body .button {
+    width: auto;
+  }
+}
+
+@media (min-width: 40rem) {
+  .checkout-form,
+  .checkout-done:not([hidden]) {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .product-detail:not([hidden]) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 3rem;
+  }
+}
+
+@media (min-width: 62.5rem) {
+  .product-detail:not([hidden]) {
+    gap: 4rem;
+  }
+
+  .checkout-layout:not([hidden]) {
+    grid-template-columns: minmax(0, 1fr) 22rem;
+    gap: 2.5rem;
   }
 }

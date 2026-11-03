@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="See a product's picture, category and price, and add it to your cart in ShopBoard, a demo shop built for a course. Nothing is really sold." />
+    <meta property="og:title" content="Product · ShopBoard" />
+    <meta property="og:description" content="See a product's picture, category and price, and add it to your cart in ShopBoard, a demo shop built for a course. Nothing is really sold." />
+    <meta property="og:type" content="website" />
+    <title>Product · ShopBoard</title>
+    <script>
+      // Applies the saved theme before the page is drawn, so it never flashes.
+      // The same key is read and written by src/modules/theme/theme.state.ts.
+      try {
+        var theme = localStorage.getItem("shopboard-theme");
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+      } catch (error) {}
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body data-page="product">
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="logo" href="./" aria-label="ShopBoard home">
+          <svg viewBox="0 0 32 32" aria-hidden="true">
+            <path
+              d="M4 9a5 5 0 0 1 5-5h9.6a3 3 0 0 1 2.1.9l7.4 7.4a3 3 0 0 1 0 4.2l-9.6 9.6a3 3 0 0 1-4.2 0L4.9 18.7A3 3 0 0 1 4 16.6z"
+              fill="currentColor"
+            />
+            <circle class="logo-cut" cx="10.5" cy="10.5" r="2.6" />
+            <path class="logo-cut" d="M13 20.5l6-6" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          ShopBoard
+        </a>
+        <nav aria-label="Main">
+          <ul class="nav-list">
+            <li><a href="./">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li>
+              <a href="cart.html">
+                Cart <span id="cart-count" class="badge" aria-live="polite">0</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <fieldset id="theme-switch" class="theme-switch">
+          <legend class="visually-hidden">Theme</legend>
+          <input id="theme-system" type="radio" name="theme" value="system" checked />
+          <label for="theme-system" title="System">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="12" rx="2" />
+              <path d="M8 20h8M12 16v4" />
+            </svg>
+            <span class="visually-hidden">System</span>
+          </label>
+          <input id="theme-light" type="radio" name="theme" value="light" />
+          <label for="theme-light" title="Light">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+            </svg>
+            <span class="visually-hidden">Light</span>
+          </label>
+          <input id="theme-dark" type="radio" name="theme" value="dark" />
+          <label for="theme-dark" title="Dark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.5 13.5A8.5 8.5 0 1 1 10.5 3.5a7.5 7.5 0 0 0 10 10z" />
+            </svg>
+            <span class="visually-hidden">Dark</span>
+          </label>
+        </fieldset>
+      </div>
+    </header>
+
+    <main id="main" class="container product-page">
+      <a class="back-link" href="shop.html">Back to shop</a>
+
+      <p id="product-status" class="status" aria-live="polite"></p>
+
+      <!-- Shown by products.ui.ts when the id is missing, not a number, or unknown -->
+      <div id="product-missing" class="cart-empty-state product-missing" hidden>
+        <h1>Product not found</h1>
+        <p>We couldn't find a product at this address. The link may be wrong or out of date.</p>
+        <a class="button" href="shop.html">Browse the shop</a>
+      </div>
+
+      <!-- Filled by products.ui.ts once the products have loaded -->
+      <article id="product-detail" class="product-detail" aria-labelledby="product-name" hidden>
+        <div id="product-media" class="product-detail-media"></div>
+        <div class="product-detail-body">
+          <p id="product-category" class="eyebrow"></p>
+          <h1 id="product-name"></h1>
+          <p id="product-price" class="product-detail-price"></p>
+          <button id="product-add" class="button" type="button">Add to cart</button>
+        </div>
+      </article>
+
+      <section id="related" class="related" aria-labelledby="related-title" hidden>
+        <h2 id="related-title">More in <em id="related-category"></em></h2>
+        <div id="related-grid" class="product-grid"></div>
+      </section>
+
+      <noscript><p>Please enable JavaScript to see this product.</p></noscript>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-card">
+        <p class="footer-name">ShopBoard</p>
+        <nav class="footer-nav" aria-label="Footer">
+          <div class="footer-group">
+            <h2 class="footer-heading">Shop</h2>
+            <ul class="footer-links">
+              <li><a href="shop.html">All products</a></li>
+              <li><a href="cart.html">Cart</a></li>
+              <li><a href="./#register">Join</a></li>
+            </ul>
+          </div>
+          <div class="footer-group">
+            <h2 class="footer-heading">Help</h2>
+            <ul class="footer-links">
+              <li><a href="contact.html">Contact</a></li>
+              <li><a href="faq.html">FAQ</a></li>
+              <li><a href="shipping-returns.html">Shipping &amp; returns</a></li>
+            </ul>
+          </div>
+          <div class="footer-group">
+            <h2 class="footer-heading">About</h2>
+            <ul class="footer-links">
+              <li><a href="about.html">About ShopBoard</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="terms.html">Terms</a></li>
+              <li><a href="credits.html">Photo credits</a></li>
+            </ul>
+          </div>
+        </nav>
+        <p class="footer-bar">
+          <span>&copy; 2026 ShopBoard</span>
+          <span>Demo shop for a course: no real orders or payments.</span>
+        </p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -23,6 +23,13 @@ src/
 │   │   ├── cart.state.ts       السلة نفسها + localStorage + reloadCart
 │   │   ├── cart.logic.ts       العدد والإجمالي وتنظيف البيانات
 │   │   └── cart.ui.ts          صفحة السلة والرقم بالهيدر + bindCartSync
+│   ├── checkout/
+│   │   ├── checkout.types.ts   CheckoutFormValues و CheckoutHandlers
+│   │   ├── checkout.logic.ts   getFirstName و buildConfirmation (دوال نقية)
+│   │   └── checkout.ui.ts      ملخص الطلب وفورم التوصيل والتأكيد (demo، بدون دفع)
+│   ├── contact/
+│   │   ├── contact.types.ts    شكل ContactHandlers
+│   │   └── contact.ui.ts       فورم التواصل (demo): بيبلّغ main.ts عن الـ submit
 │   ├── register/
 │   │   ├── register.types.ts   شكل RegisterHandlers
 │   │   └── register.ui.ts      فورم التسجيل (demo): بيبلّغ main.ts عن الـ submit
@@ -123,6 +130,27 @@ submit ─► register.ui                 (المتصفح ما بيبعته إل
 - كل تغيير بـ `cart.state` (`addToCart` و `changeQty` و `removeFromCart` و `clearCart` و `keepOnly`) بيستدعي `reloadCart` أول شي، فالحفظ ما بيمسح شي حفظه تاب ثاني.
 - إذا آخر حفظ فشل (`lastSaveFailed`)، `reloadCart` ما بيعمل شي: النسخة اللي بالذاكرة أحدث من المحفوظة.
 
+**صفحة المنتج: `product.html?id=N`**
+```
+main.startProduct()
+  ─► shared/ui/page.getQueryParam("id") ─► products.logic.parseProductId   (رقم صحيح، أو null)
+  ─► null: products.ui.renderProductNotFound()                             (ما بيحمّل المنتجات أصلاً)
+  ─► products.api.getProducts ─► findProduct ─► products.logic.getRelatedProducts (لحد 4 من نفس الفئة)
+  ─► products.ui.renderProductPage({ product, related })
+Add to cart ─► نفس إضافة المتجر (cart.state.addToCart + toast فيه View cart)
+```
+
+**الـ Checkout (demo، بدون دفع)**
+```
+main.startCheckout()
+  ─► cart.logic ─► checkout.ui.renderCheckout(summary)        (السلة فاضية: رسالة ورابط للمتجر)
+submit ─► checkout.ui (preventDefault) ─► main.onSubmit(values)
+  ─► checkout.logic.buildConfirmation ─► cart.state.clearCart ─► checkout.ui.renderCheckoutConfirmation
+```
+
+- `checkout` ما بيستورد كود من `cart`، بس `import type`. الوصل بيناتهم شغلة `main.ts`.
+- بعد ما يطلع التأكيد (`checkoutPageReady`)، تغييرات السلة من تاب تاني ما بتمسحه.
+
 **الثيم: System / Light / Dark (على كل صفحة)**
 ```
 قبل ما تنرسم الصفحة ─► سكربت زغير بالـ <head>     (بيقرا "shopboard-theme" وبيحط <html data-theme>)
@@ -141,7 +169,7 @@ main.startTheme()
 الموقع منشور على GitHub Pages تحت `/shopboard/` (https://zainabwatfa.github.io/shopboard/)، مش على أول الدومين. يعني أي مسار بيبلش بـ `/` بيطلع برّا الموقع.
 
 - `vite.config.ts` فيه `base: "./"`، فالملفات المبنية بتأشّر على بعضها بمسارات نسبية.
-- الروابط والمسارات اللي منكتبها بإيدنا بدون `/`: `./` و `shop.html` و `cart.html` و `./#register` بالـ HTML وبالـ toast، و `api/products.json` بـ `products.api.ts`، و `products/x.svg` بـ `products.json`.
+- الروابط والمسارات اللي منكتبها بإيدنا بدون `/`: `./` و `shop.html` و `cart.html` و `./#register` بالـ HTML وبالـ toast، و `api/products.json` بـ `products.api.ts`، و `products/x.webp` (أو `x.svg`) بـ `products.json`، و `product.html?id=N` و `checkout.html`.
 - الاستثناء: مسارات `<script>` و `<link>` و `<img>` بالـ HTML (مثل `/src/main.ts` و `/favicon.svg`) بتضل بـ `/`، لأن Vite بيحوّلها لمسارات نسبية وقت الـ build.
 
 ## وين بتروح ميزة جديدة؟ (مثال: wishlist)

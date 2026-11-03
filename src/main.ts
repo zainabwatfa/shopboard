@@ -2,7 +2,7 @@
 // the modules decide *how*. Every HTML page loads this one file, and it only
 // wires up what that page has.
 import { ApiError } from "./shared/api/client.ts";
-import { getCurrentPage } from "./shared/ui/page.ts";
+import { getCurrentPage, getQueryParam } from "./shared/ui/page.ts";
 import { showToast } from "./shared/ui/toast.ts";
 
 import type { Product } from "./modules/products/products.types.ts";
@@ -10,17 +10,23 @@ import { getProducts } from "./modules/products/products.api.ts";
 import {
   filterProducts,
   findProduct,
+  getRelatedProducts,
   parseCategory,
+  parseProductId,
   parseSortKey,
   sortProducts,
 } from "./modules/products/products.logic.ts";
 import {
   bindProductEvents,
+  bindProductPageEvents,
   getFilters,
+  renderProductNotFound,
+  renderProductPage,
   renderProducts,
   renderProductsStatus,
 } from "./modules/products/products.ui.ts";
 
+import type { CartView } from "./modules/cart/cart.types.ts";
 import {
   addToCart,
   changeQty,
@@ -44,6 +50,16 @@ import {
   renderCartStatus,
 } from "./modules/cart/cart.ui.ts";
 
+import { buildConfirmation } from "./modules/checkout/checkout.logic.ts";
+import {
+  bindCheckoutEvents,
+  renderCheckout,
+  renderCheckoutConfirmation,
+  renderCheckoutStatus,
+} from "./modules/checkout/checkout.ui.ts";
+
+import { bindContactEvents } from "./modules/contact/contact.ui.ts";
+
 import { bindRegisterEvents } from "./modules/register/register.ui.ts";
 
 import { parseThemeChoice } from "./modules/theme/theme.logic.ts";
@@ -60,6 +76,10 @@ let products: readonly Product[] = [];
 
 // True once the cart page has its products and has been drawn
 let cartPageReady = false;
+
+// True once the checkout page has its products and shows the order summary.
+// False again after the demo order is placed: the confirmation then stays as it is.
+let checkoutPageReady = false;
 
 // Loads the products, then drops cart items for products that no longer exist.
 // Returns an error message to show, or null when it worked.
@@ -81,6 +101,30 @@ function refreshCount(): void {
   renderCartCount(getCartCount(getCart()));
 }
 
+// Lines, item count and total of the cart as it is now (cart and checkout pages)
+function getCartView(): CartView {
+  const cart = getCart();
+  return {
+    lines: getCartLines(cart, products),
+    count: getCartCount(cart),
+    total: getCartTotal(cart, products),
+  };
+}
+
+// Shop and product pages: the id comes from the page, so only add it if it is
+// a real product, then update the badge and say so with a "View cart" button
+function addProductToCart(id: number): void {
+  const product = findProduct(products, id);
+  if (!product) return;
+  addToCart(id);
+  refreshCount();
+  showToast(
+    // The quantity makes the text change every time, so it's announced again
+    `${product.name} added to your cart (${getItemQty(getCart(), id)} in cart).`,
+    { action: { label: "View cart", href: "cart.html" } },
+  );
+}
+
 // Shop page: filter first, then sort a copy, then draw
 function refreshProducts(): void {
   const { query, category, sortKey } = getFilters();
@@ -90,12 +134,13 @@ function refreshProducts(): void {
 
 // Cart page: rows, item count and total
 function refreshCart(): void {
-  const cart = getCart();
-  renderCart({
-    lines: getCartLines(cart, products),
-    count: getCartCount(cart),
-    total: getCartTotal(cart, products),
-  });
+  renderCart(getCartView());
+  refreshCount();
+}
+
+// Checkout page: the order summary, or the empty state
+function refreshCheckout(): void {
+  renderCheckout(getCartView());
   refreshCount();
 }
 
@@ -110,20 +155,35 @@ async function startShop(): Promise<void> {
 
   bindProductEvents({
     onFiltersChange: refreshProducts,
-    onAdd: (id) => {
-      // The id comes from the page, so only add it if it is a real product
-      const product = findProduct(products, id);
-      if (!product) return;
-      addToCart(id);
-      refreshCount();
-      showToast(
-        // The quantity makes the text change every time, so it's announced again
-        `${product.name} added to your cart (${getItemQty(getCart(), id)} in cart).`,
-        { action: { label: "View cart", href: "cart.html" } },
-      );
-    },
+    onAdd: addProductToCart,
   });
   refreshProducts();
+}
+
+// Product page: product.html?id=3
+async function startProduct(): Promise<void> {
+  // The id is text from the address bar: a bad one needs no product list
+  const id = parseProductId(getQueryParam("id"));
+  if (id === null) {
+    renderProductNotFound();
+    return;
+  }
+
+  renderProductsStatus("Loading product…");
+  const error = await loadProducts();
+  if (error) {
+    renderProductsStatus(error);
+    return;
+  }
+  refreshCount();
+
+  const product = findProduct(products, id);
+  if (!product) {
+    renderProductNotFound();
+    return;
+  }
+  bindProductPageEvents({ onAdd: addProductToCart });
+  renderProductPage({ product, related: getRelatedProducts(products, product) });
 }
 
 async function startCart(): Promise<void> {
@@ -157,10 +217,45 @@ async function startCart(): Promise<void> {
   cartPageReady = true;
 }
 
+// Checkout page: a demo. A valid submit sends nothing; it shows a confirmation
+// with a snapshot of the order, then empties the cart.
+async function startCheckout(): Promise<void> {
+  renderCheckoutStatus("Loading your order…");
+  const error = await loadProducts();
+  if (error) {
+    renderCheckoutStatus(error);
+    return;
+  }
+
+  bindCheckoutEvents({
+    onSubmit: (values) => {
+      reloadCart(); // build on the latest saved cart, even if another tab changed it
+      const summary = getCartView();
+      if (summary.lines.length === 0) {
+        refreshCheckout(); // emptied meanwhile: show the empty state instead
+        return;
+      }
+      checkoutPageReady = false;
+      clearCart();
+      refreshCount();
+      renderCheckoutConfirmation(buildConfirmation(values, summary));
+    },
+  });
+  refreshCheckout();
+  checkoutPageReady = true;
+}
+
 // Home page: the register form is a demo, so a valid submit only says so
 function startHome(): void {
   bindRegisterEvents({
     onSubmit: () => showToast("Thanks! This is a demo, so nothing was sent or saved."),
+  });
+}
+
+// Contact page: the same kind of demo form
+function startContact(): void {
+  bindContactEvents({
+    onSubmit: () => showToast("Thanks! This is a demo, so your message was not sent."),
   });
 }
 
@@ -194,10 +289,30 @@ refreshCount();
 bindCartSync(() => {
   reloadCart();
   if (cartPageReady) refreshCart(); // refreshCart also updates the badge
+  else if (checkoutPageReady) refreshCheckout(); // so does refreshCheckout
   else refreshCount();
 });
 
-const page = getCurrentPage();
-if (page === "home") startHome();
-if (page === "shop") void startShop();
-if (page === "cart") void startCart();
+// Only the pages below have something of their own to start. The others
+// (about, faq, shipping, privacy, terms, credits, notfound), and a page with a
+// missing or unknown data-page, only get the theme switch and the cart badge.
+switch (getCurrentPage()) {
+  case "home":
+    startHome();
+    break;
+  case "shop":
+    void startShop();
+    break;
+  case "product":
+    void startProduct();
+    break;
+  case "cart":
+    void startCart();
+    break;
+  case "checkout":
+    void startCheckout();
+    break;
+  case "contact":
+    startContact();
+    break;
+}

@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; there is no checkout and no payment." />
+    <meta name="description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; the checkout is a demo and takes no payment." />
     <meta property="og:title" content="Cart · ShopBoard" />
-    <meta property="og:description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; there is no checkout and no payment." />
+    <meta property="og:description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; the checkout is a demo and takes no payment." />
     <meta property="og:type" content="website" />
     <title>Cart · ShopBoard</title>
     <script>
@@ -101,9 +101,10 @@
           <h2 id="summary-title">Summary</h2>
           <p>Items <span id="cart-items">0 items</span></p>
           <p class="cart-total-row">Total <strong id="cart-total">$0.00</strong></p>
-          <p class="hint">Demo shop: there is no checkout, and no payment is taken.</p>
+          <p class="hint">Demo shop: the checkout is a demo too, and no payment is taken.</p>
+          <a class="button" href="checkout.html">Checkout (demo)</a>
+          <a class="button button-secondary" href="shop.html">Continue shopping</a>
           <button id="cart-clear" class="button button-secondary" type="button">Clear cart</button>
-          <a class="button" href="shop.html">Continue shopping</a>
         </aside>
       </div>
     </main>
@@ -111,12 +112,32 @@
     <footer class="site-footer">
       <div class="container footer-card">
         <p class="footer-name">ShopBoard</p>
-        <nav aria-label="Footer">
-          <ul class="footer-links">
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="cart.html">Cart</a></li>
-            <li><a href="./#register">Join</a></li>
-          </ul>
+        <nav class="footer-nav" aria-label="Footer">
+          <div class="footer-group">
+            <h2 class="footer-heading">Shop</h2>
+            <ul class="footer-links">
+              <li><a href="shop.html">All products</a></li>
+              <li><a href="cart.html">Cart</a></li>
+              <li><a href="./#register">Join</a></li>
+            </ul>
+          </div>
+          <div class="footer-group">
+            <h2 class="footer-heading">Help</h2>
+            <ul class="footer-links">
+              <li><a href="contact.html">Contact</a></li>
+              <li><a href="faq.html">FAQ</a></li>
+              <li><a href="shipping-returns.html">Shipping &amp; returns</a></li>
+            </ul>
+          </div>
+          <div class="footer-group">
+            <h2 class="footer-heading">About</h2>
+            <ul class="footer-links">
+              <li><a href="about.html">About ShopBoard</a></li>
+              <li><a href="privacy.html">Privacy</a></li>
+              <li><a href="terms.html">Terms</a></li>
+              <li><a href="credits.html">Photo credits</a></li>
+            </ul>
+          </div>
         </nav>
         <p class="footer-bar">
           <span>&copy; 2026 ShopBoard</span>

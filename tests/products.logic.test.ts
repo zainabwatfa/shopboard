@@ -1,12 +1,15 @@
 // Tests for the pure product functions: checking API data, reading the
-// filter controls, search, category filter and sort.
+// filter controls, search, category filter, sort, and the product page
+// (the id from the address bar, "More in <category>").
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 import {
   filterProducts,
   findProduct,
+  getRelatedProducts,
   isProduct,
   parseCategory,
+  parseProductId,
   parseSortKey,
   sortProducts,
 } from "../src/modules/products/products.logic.ts";
@@ -225,5 +228,93 @@ describe("sortProducts", () => {
 
   test("an empty list stays empty", () => {
     assert.deepEqual(sortProducts([], "price-asc"), []);
+  });
+});
+
+describe("parseProductId", () => {
+  test("reads a whole number", () => {
+    assert.equal(parseProductId("3"), 3);
+    assert.equal(parseProductId("13"), 13);
+    assert.equal(parseProductId("0"), 0); // a number, even if no product has it
+  });
+
+  test("ignores spaces around the number", () => {
+    assert.equal(parseProductId("  3 "), 3);
+    assert.equal(parseProductId("\t3\n"), 3);
+  });
+
+  test("a missing id gives null", () => {
+    assert.equal(parseProductId(null), null);
+  });
+
+  test("anything that is not only digits gives null", () => {
+    const bad = ["", "   ", "abc", "3abc", "abc3", "1.5", "1.0", "-2", "+3", "1e2", "0x10", "3 4", "Infinity", "NaN", "١"];
+    for (const value of bad) {
+      assert.equal(parseProductId(value), null, `for ${JSON.stringify(value)}`);
+    }
+  });
+
+  test("a number too big to be exact gives null", () => {
+    assert.equal(parseProductId("99999999999999999999"), null);
+    assert.equal(parseProductId(String(2 ** 53)), null);
+    assert.equal(parseProductId(String(Number.MAX_SAFE_INTEGER)), Number.MAX_SAFE_INTEGER);
+  });
+});
+
+describe("getRelatedProducts", () => {
+  // Every entry of public/api/products.json, frozen
+  const ALL: readonly Product[] = Object.freeze([
+    product(1, "Leather Tote Bag", "Bags", 89, "products/leather-tote-bag.svg"),
+    product(2, "Canvas Backpack", "Bags", 49, "products/canvas-backpack.svg"),
+    product(3, "Mini Crossbody Bag", "Bags", 39, "products/mini-crossbody-bag.svg"),
+    product(4, "White Sneakers", "Shoes", 75, "products/white-sneakers.svg"),
+    product(5, "Running Shoes", "Shoes", 110, "products/running-shoes.svg"),
+    product(6, "Suede Loafers", "Shoes", 95, "products/suede-loafers.svg"),
+    product(7, "Hand Bag", "Bags", 25, "products/hand-bag.svg"),
+    product(8, "Silver Watch", "Accessories", 150, "products/silver-watch.svg"),
+    product(9, "Sunglasses", "Accessories", 35, "products/sunglasses.svg"),
+    product(10, "Travel Duffel Bag", "Bags", 120, "products/travel-duffel-bag.svg"),
+    product(11, "Rain Boots", "Shoes", 60, "products/rain-boots.svg"),
+    product(12, "Leather Belt", "Accessories", 30, "products/leather-belt.svg"),
+    product(13, "Leather Wallet", "Accessories", 45, "products/leather-wallet.svg"),
+  ]);
+
+  const get = (id: number): Product => {
+    const found = findProduct(ALL, id);
+    assert.ok(found, `no product ${id} in the test data`);
+    return found;
+  };
+
+  test("gives other products of the same category, never the product itself", () => {
+    assert.deepEqual(ids(getRelatedProducts(ALL, get(4))), [5, 6, 11]);
+    assert.deepEqual(ids(getRelatedProducts(ALL, get(9))), [8, 12, 13]);
+  });
+
+  test("gives at most 4, in id order", () => {
+    assert.deepEqual(ids(getRelatedProducts(ALL, get(3))), [1, 2, 7, 10]);
+    assert.deepEqual(ids(getRelatedProducts(ALL, get(10))), [1, 2, 3, 7]);
+  });
+
+  test("uses id order even when the list is in another order", () => {
+    assert.deepEqual(ids(getRelatedProducts(PRODUCTS, get(1))), [2, 7]);
+  });
+
+  test("a smaller limit gives fewer; 0 or less gives none", () => {
+    assert.deepEqual(ids(getRelatedProducts(ALL, get(1), 2)), [2, 3]);
+    assert.deepEqual(getRelatedProducts(ALL, get(1), 0), []);
+    assert.deepEqual(getRelatedProducts(ALL, get(1), -1), []);
+  });
+
+  test("a category with no other product gives an empty list", () => {
+    const onlyOne = Object.freeze([get(8), get(1)]);
+    assert.deepEqual(getRelatedProducts(onlyOne, get(8)), []);
+    assert.deepEqual(getRelatedProducts([], get(8)), []);
+  });
+
+  test("never changes the list it was given", () => {
+    const before = ids(PRODUCTS);
+    const result = getRelatedProducts(PRODUCTS, get(1)); // PRODUCTS is frozen: changing it would throw
+    assert.notEqual(result, PRODUCTS);
+    assert.deepEqual(ids(PRODUCTS), before);
   });
 });
