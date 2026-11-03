@@ -35,7 +35,8 @@ export function getItemQty(cart: readonly CartItem[], id: number): number {
   return cart.find((item) => item.id === id)?.qty ?? 0;
 }
 
-// A type guard: if it returns true, TypeScript treats `value` as a CartItem
+// A type guard: if it returns true, TypeScript treats `value` as a CartItem.
+// qty must be a safe integer, so + and − always change it by exactly 1.
 function isCartItem(value: unknown): value is CartItem {
   if (typeof value !== "object" || value === null) return false;
   const { id, qty } = value as { id?: unknown; qty?: unknown };
@@ -43,14 +44,21 @@ function isCartItem(value: unknown): value is CartItem {
     typeof id === "number" &&
     Number.isInteger(id) &&
     typeof qty === "number" &&
-    Number.isInteger(qty) &&
+    Number.isSafeInteger(qty) &&
     qty > 0
   );
 }
 
-// Keeps only well-formed { id, qty } entries.
+// Keeps only well-formed { id, qty } entries, one per product: the same id
+// twice adds up the quantities, so the cart never shows two lines for it.
 // `unknown` because what was loaded from storage may be old or edited by hand.
 export function sanitizeCart(saved: unknown): CartItem[] {
   if (!Array.isArray(saved)) return [];
-  return saved.filter(isCartItem).map((item) => ({ id: item.id, qty: item.qty }));
+  const merged: CartItem[] = [];
+  for (const item of saved.filter(isCartItem)) {
+    const same = merged.find((entry) => entry.id === item.id);
+    if (same) same.qty += item.qty;
+    else merged.push({ id: item.id, qty: item.qty });
+  }
+  return merged;
 }

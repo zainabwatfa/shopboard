@@ -27,6 +27,7 @@ import {
   clearCart,
   getCart,
   keepOnly,
+  reloadCart,
   removeFromCart,
 } from "./modules/cart/cart.state.ts";
 import {
@@ -37,13 +38,19 @@ import {
 } from "./modules/cart/cart.logic.ts";
 import {
   bindCartEvents,
+  bindCartSync,
   renderCart,
   renderCartCount,
   renderCartStatus,
 } from "./modules/cart/cart.ui.ts";
 
+import { bindRegisterEvents } from "./modules/register/register.ui.ts";
+
 // Filled once the product list has loaded
 let products: readonly Product[] = [];
+
+// True once the cart page has its products and has been drawn
+let cartPageReady = false;
 
 // Loads the products, then drops cart items for products that no longer exist.
 // Returns an error message to show, or null when it worked.
@@ -95,16 +102,16 @@ async function startShop(): Promise<void> {
   bindProductEvents({
     onFiltersChange: refreshProducts,
     onAdd: (id) => {
+      // The id comes from the page, so only add it if it is a real product
+      const product = findProduct(products, id);
+      if (!product) return;
       addToCart(id);
       refreshCount();
-      const product = findProduct(products, id);
-      if (product) {
-        showToast(
-          // The quantity makes the text change every time, so it's announced again
-          `${product.name} added to your cart (${getItemQty(getCart(), id)} in cart).`,
-          { action: { label: "View cart", href: "/cart.html" } },
-        );
-      }
+      showToast(
+        // The quantity makes the text change every time, so it's announced again
+        `${product.name} added to your cart (${getItemQty(getCart(), id)} in cart).`,
+        { action: { label: "View cart", href: "cart.html" } },
+      );
     },
   });
   refreshProducts();
@@ -138,10 +145,27 @@ async function startCart(): Promise<void> {
     },
   });
   refreshCart();
+  cartPageReady = true;
+}
+
+// Home page: the register form is a demo, so a valid submit only says so
+function startHome(): void {
+  bindRegisterEvents({
+    onSubmit: () => showToast("Thanks! This is a demo, so nothing was sent or saved."),
+  });
 }
 
 refreshCount();
 
+// The cart changed in another tab, or Back brought this page back from the
+// browser's cache: read it again and redraw what this page shows
+bindCartSync(() => {
+  reloadCart();
+  if (cartPageReady) refreshCart(); // refreshCart also updates the badge
+  else refreshCount();
+});
+
 const page = getCurrentPage();
+if (page === "home") startHome();
 if (page === "shop") void startShop();
 if (page === "cart") void startCart();

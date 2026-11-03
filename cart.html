@@ -4,13 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Your ShopBoard cart." />
+    <meta name="description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; there is no checkout and no payment." />
+    <meta property="og:title" content="Cart · ShopBoard" />
+    <meta property="og:description" content="Your cart in ShopBoard, a demo shop built for a course. The cart is saved on this device; there is no checkout and no payment." />
+    <meta property="og:type" content="website" />
     <title>Cart · ShopBoard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..700&display=swap"
     />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
@@ -19,7 +22,7 @@
 
     <header class="site-header">
       <div class="container header-inner">
-        <a class="logo" href="/" aria-label="ShopBoard home">
+        <a class="logo" href="./" aria-label="ShopBoard home">
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <path
               d="M4 9a5 5 0 0 1 5-5h9.6a3 3 0 0 1 2.1.9l7.4 7.4a3 3 0 0 1 0 4.2l-9.6 9.6a3 3 0 0 1-4.2 0L4.9 18.7A3 3 0 0 1 4 16.6z"
@@ -32,10 +35,10 @@
         </a>
         <nav aria-label="Main">
           <ul class="nav-list">
-            <li><a href="/">Home</a></li>
-            <li><a href="/shop.html">Shop</a></li>
+            <li><a href="./">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
             <li>
-              <a href="/cart.html" aria-current="page">
+              <a href="cart.html" aria-current="page">
                 Cart <span id="cart-count" class="badge" aria-live="polite">0</span>
               </a>
             </li>
@@ -54,7 +57,7 @@
 
       <div id="cart-empty" class="cart-empty-state" hidden>
         <p>Your cart is empty.</p>
-        <a class="button" href="/shop.html">Browse the shop</a>
+        <a class="button" href="shop.html">Browse the shop</a>
       </div>
 
       <div class="cart-layout">
@@ -64,20 +67,27 @@
           <h2 id="summary-title">Summary</h2>
           <p>Items <span id="cart-items">0 items</span></p>
           <p class="cart-total-row">Total <strong id="cart-total">$0.00</strong></p>
+          <p class="hint">Demo shop: there is no checkout, and no payment is taken.</p>
           <button id="cart-clear" class="button button-secondary" type="button">Clear cart</button>
-          <a class="button" href="/shop.html">Continue shopping</a>
+          <a class="button" href="shop.html">Continue shopping</a>
         </aside>
       </div>
     </main>
 
     <footer class="site-footer">
-      <div class="container footer-inner">
-        <p>&copy; 2026 ShopBoard</p>
-        <ul class="footer-links">
-          <li><a href="/shop.html">Shop</a></li>
-          <li><a href="/cart.html">Cart</a></li>
-          <li><a href="/#register">Join</a></li>
-        </ul>
+      <div class="container footer-card">
+        <p class="footer-name">ShopBoard</p>
+        <nav aria-label="Footer">
+          <ul class="footer-links">
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="./#register">Join</a></li>
+          </ul>
+        </nav>
+        <p class="footer-bar">
+          <span>&copy; 2026 ShopBoard</span>
+          <span>Demo shop for a course: no real orders or payments.</span>
+        </p>
       </div>
     </footer>
 
