@@ -1,6 +1,7 @@
 // Pure functions for products: everything comes in as arguments, a new value
 // goes out. No page access, no saving, no network, and inputs are never changed.
 import type {
+  Category,
   CategoryFilter,
   Filters,
   Product,
@@ -8,19 +9,38 @@ import type {
   SortKey,
 } from "./products.types.ts";
 
-const categories: readonly string[] = ["Bags", "Shoes", "Accessories"];
-const sortKeys: readonly string[] = ["default", "price-asc", "price-desc", "name-asc"];
+// Typed lists, so TypeScript checks that every entry is a real Category / SortKey
+const categories: readonly Category[] = ["Bags", "Shoes", "Accessories"];
+const sortKeys: readonly SortKey[] = ["default", "price-asc", "price-desc", "name-asc"];
+
+// Type guards: text from outside becomes a Category / SortKey only after this check
+function isCategory(value: unknown): value is Category {
+  return categories.some((category) => category === value);
+}
+
+function isSortKey(value: unknown): value is SortKey {
+  return sortKeys.some((key) => key === value);
+}
 
 // A type guard for data from outside (the API): true only for a well-formed product
 export function isProduct(value: unknown): value is Product {
   if (typeof value !== "object" || value === null) return false;
-  const { id, name, category, price, image } = value as Record<string, unknown>;
+  // `in` checks prove each field exists, so TypeScript allows reading them (as unknown)
+  if (
+    !("id" in value) ||
+    !("name" in value) ||
+    !("category" in value) ||
+    !("price" in value) ||
+    !("image" in value)
+  ) {
+    return false;
+  }
+  const { id, name, category, price, image } = value;
   return (
     typeof id === "number" &&
     Number.isInteger(id) &&
     typeof name === "string" &&
-    typeof category === "string" &&
-    categories.includes(category) &&
+    isCategory(category) &&
     typeof price === "number" &&
     Number.isFinite(price) && // JSON like 1e999 parses to Infinity
     price >= 0 &&
@@ -30,11 +50,11 @@ export function isProduct(value: unknown): value is Product {
 
 // The page gives plain text. These turn it into a known value, or a safe default.
 export function parseCategory(value: string): CategoryFilter {
-  return categories.includes(value) ? (value as CategoryFilter) : "all";
+  return isCategory(value) ? value : "all";
 }
 
 export function parseSortKey(value: string): SortKey {
-  return sortKeys.includes(value) ? (value as SortKey) : "default";
+  return isSortKey(value) ? value : "default";
 }
 
 // The shop with no search, every category, in the default order. Frozen, so
