@@ -4,7 +4,7 @@
     "name": "Leather Tote Bag",
     "category": "Bags",
     "price": 89,
-    "image": "products/leather-tote-bag.svg"
+    "image": "products/leather-tote-bag.webp"
   },
   {
     "id": 2,
@@ -67,7 +67,7 @@
     "name": "Travel Duffel Bag",
     "category": "Bags",
     "price": 120,
-    "image": "products/travel-duffel-bag.svg"
+    "image": "products/travel-duffel-bag.webp"
   },
   {
     "id": 11,

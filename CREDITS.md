@@ -63,9 +63,17 @@ Crop boxes, in pixels of the 1600 px wide download (left, top, right, bottom):
 | Sunglasses         | 31305965  | 348, 82, 1328, 1062  |
 | White Sneakers     | 7193625   | 287, 0, 1247, 960    |
 
-## Products that still use drawings
+## AI-generated images
 
-Leather Tote Bag and Travel Duffel Bag still use ShopBoard's own SVG drawings
-(`public/products/*.svg`). No candidate photo for them passed the checks (shows the right product,
-no faces, no visible brand name or logo), so there is nothing to credit for them yet. The SVG files
-are kept: `index.html` also uses one of them.
+Two products have no photo of a real item: no free photo passed the checks (the right product, no
+faces, no visible brand name or logo). Their pictures were generated with AI for this demo, using
+Gamma's image generator (prompt: a plain product shot on a light grey studio background, no logos,
+no text, no people). They do not show a real product and nobody is credited for them.
+
+| Product           | File                                     | Made with              |
+| ----------------- | ---------------------------------------- | ---------------------- |
+| Leather Tote Bag  | `public/products/leather-tote-bag.webp`  | AI image (Gamma), 2026 |
+| Travel Duffel Bag | `public/products/travel-duffel-bag.webp` | AI image (Gamma), 2026 |
+
+Both were cropped to a square around the bag and saved as 800 × 800 WebP. The older SVG drawings in
+`public/products/*.svg` are kept but no longer used by the product data.
