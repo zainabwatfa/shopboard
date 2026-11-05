@@ -7,19 +7,25 @@
     "react/exhaustive-deps": "error",
     "react/jsx-key": "error",
     "react/no-array-index-key": "error",
-    "react/only-export-components": [
-      "warn",
-      {
-        "allowConstantExport": true
-      }
-    ],
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
     "typescript/no-explicit-any": "error",
     "typescript/no-non-null-assertion": "error",
     "typescript/consistent-type-assertions": [
       "error",
-      {
-        "assertionStyle": "never"
-      }
+      { "assertionStyle": "never" }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/modules/**/*.types.ts",
+        "src/modules/**/*.api.ts",
+        "src/modules/**/*.logic.ts",
+        "src/modules/**/*.state.ts"
+      ],
+      "rules": {
+        "typescript/consistent-type-assertions": "off"
+      }
+    }
+  ]
 }

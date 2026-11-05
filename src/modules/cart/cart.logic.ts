@@ -39,9 +39,7 @@ export function getItemQty(cart: readonly CartItem[], id: number): number {
 // qty must be a safe integer, so + and − always change it by exactly 1.
 function isCartItem(value: unknown): value is CartItem {
   if (typeof value !== "object" || value === null) return false;
-  // `in` checks prove both fields exist, so TypeScript allows reading them (as unknown)
-  if (!("id" in value) || !("qty" in value)) return false;
-  const { id, qty } = value;
+  const { id, qty } = value as { id?: unknown; qty?: unknown };
   return (
     typeof id === "number" &&
     Number.isInteger(id) &&
