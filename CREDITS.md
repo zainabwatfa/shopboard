@@ -18,6 +18,11 @@ so none of these products is really for sale.
 Photographer names are as listed in Pexels search results. The Pexels photo pages
 could not be opened while this was put together, so the names were not confirmed there.
 
+For the Suede Loafers photo, the search results did not show the photo's own page. The name is
+the one they list for another photo from the same shoot (same shoes, stands and background):
+https://www.pexels.com/es-es/foto/vista-superior-de-elegantes-mocasines-de-gamuza-en-cajas-31935097/.
+Its link below uses the photo id only.
+
 | Product            | File                                      | Photographer                                                                 | Photo on Pexels                                                                                       |
 | ------------------ | ----------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
 | Canvas Backpack    | `public/products/canvas-backpack.webp`    | Alexander Mass                                                               | https://www.pexels.com/photo/beige-backpack-standing-by-a-tree-18886236/                              |
@@ -28,6 +33,7 @@ could not be opened while this was put together, so the names were not confirmed
 | Rain Boots         | `public/products/rain-boots.webp`         | Vika Yagupa                                                                  | https://www.pexels.com/photo/yellow-rain-boots-8612884/                                               |
 | Running Shoes      | `public/products/running-shoes.webp`      | Luis Quintero                                                                | https://www.pexels.com/photo/a-white-and-gray-shoe-on-white-background-14174467/                      |
 | Silver Watch       | `public/products/silver-watch.webp`       | Fernando Arcos                                                               | https://www.pexels.com/photo/silver-linked-bracelet-silver-and-black-round-chronograph-watch-190819/  |
+| Suede Loafers      | `public/products/suede-loafers.webp`      | Mr Abrar visuals (see the note above the table)                              | https://www.pexels.com/photo/31935085/                                                                |
 | Sunglasses         | `public/products/sunglasses.webp`         | ALOK DAS                                                                     | https://www.pexels.com/photo/stylish-black-sunglasses-on-minimalist-white-background-31305965/        |
 | White Sneakers     | `public/products/white-sneakers.webp`     | Karolina Grabowska (Kaboompics; listed as "Kaboompics / Karolina Grabowska") | https://www.pexels.com/photo/top-close-up-view-of-white-sneaker-shoes-on-light-floor-panels-7193625/  |
 
@@ -53,12 +59,13 @@ Crop boxes, in pixels of the 1600 px wide download (left, top, right, bottom):
 | Rain Boots         | 8612884   | 216, 530, 1466, 1780 |
 | Running Shoes      | 14174467  | 163, 633, 1463, 1933 |
 | Silver Watch       | 190819    | 206, 0, 1270, 1064   |
+| Suede Loafers      | 31935085  | 339, 0, 1406, 1067   |
 | Sunglasses         | 31305965  | 348, 82, 1328, 1062  |
 | White Sneakers     | 7193625   | 287, 0, 1247, 960    |
 
 ## Products that still use drawings
 
-Leather Tote Bag, Suede Loafers and Travel Duffel Bag still use ShopBoard's own SVG drawings
+Leather Tote Bag and Travel Duffel Bag still use ShopBoard's own SVG drawings
 (`public/products/*.svg`). No candidate photo for them passed the checks (shows the right product,
 no faces, no visible brand name or logo), so there is nothing to credit for them yet. The SVG files
-are kept: `index.html` also uses some of them.
+are kept: `index.html` also uses one of them.
