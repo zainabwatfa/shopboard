@@ -47,15 +47,15 @@ The product data is a real JSON file: `public/api/products.json`. The code reque
 
 ## Each file type has one job
 
-| File         | Its job                                                                                                            |
-| ------------ | ------------------------------------------------------------------------------------------------------------------ |
-| `*.types.ts` | Data shapes only. Nothing in it runs                                                                               |
-| `*.api.ts`   | Loads data from the network through `fetchJson`, then checks it                                                    |
+| File | Its job |
+|---|---|
+| `*.types.ts` | Data shapes only. Nothing in it runs |
+| `*.api.ts` | Loads data from the network through `fetchJson`, then checks it |
 | `*.logic.ts` | Pure functions: the same inputs always give the same result, and they never touch the page, storage or the network |
-| `*.state.ts` | Saves data that changes (the cart, the theme choice) in `localStorage`                                             |
-| `*.ui.ts`    | Draws on the page and reports clicks to `main.ts`                                                                  |
-| `shared/`    | Tools that more than one feature needs                                                                             |
-| `main.ts`    | Decides **when** everything happens: loads products, wires events, draws                                           |
+| `*.state.ts` | Saves data that changes (the cart, the theme choice) in `localStorage` |
+| `*.ui.ts` | Draws on the page and reports clicks to `main.ts` |
+| `shared/` | Tools that more than one feature needs |
+| `main.ts` | Decides **when** everything happens: loads products, wires events, draws |
 
 ## Who imports whom
 
@@ -77,7 +77,6 @@ modules/products ◄── modules/cart   modules/checkout  modules/contact  mod
 ## How data flows
 
 **Opening the shop page**
-
 ```
 main.startShop()
   ─► products.ui: "Loading products…"
@@ -95,7 +94,6 @@ main.startShop()
 - Load error (shop, product, cart, checkout): the status line shows the message with **Try again** ─► `main.loadPage` loads again without a page reload.
 
 **Adding a product**
-
 ```
 click ─► products.ui ─► main.onAdd
   ─► cart.state.addToCart
@@ -106,7 +104,6 @@ click ─► products.ui ─► main.onAdd
 ```
 
 **The cart page**
-
 ```
 main.startCart() ─► load the products (same path as above)
   ─► cart.state.getCart ─► cart.logic.getCartLines / getCartCount / getCartTotal
@@ -119,7 +116,6 @@ click + / − / Remove / Clear ─► cart.ui ─► main ─► cart.state ─�
 - **Clear cart** asks for confirmation first (`confirm()` in `cart.ui.ts`); `main.onClear` only runs after OK.
 
 **Home page: the register form (demo)**
-
 ```
 main.startHome()
   ─► register.ui.bindRegisterEvents({ onSubmit })
@@ -132,7 +128,6 @@ submit ─► register.ui                 (the browser only fires it when every 
 The contact form on `contact.html` works the same way through `contact.ui.bindContactEvents`.
 
 **Cart sync across tabs**
-
 ```
 another tab saves a change ─► the browser fires a "storage" event in the site's other tabs
   ─► cart.ui.bindCartSync ─► main     (bound once, on every page)
@@ -148,7 +143,6 @@ another tab saves a change ─► the browser fires a "storage" event in the sit
 - If the last save failed (`lastSaveFailed`), `reloadCart` does nothing: the copy in memory is newer than the saved one.
 
 **Product page: `product.html?id=N`**
-
 ```
 main.startProduct()
   ─► shared/ui/page.getQueryParam("id") ─► products.logic.parseProductId   (a whole number, or null)
@@ -159,7 +153,6 @@ Add to cart ─► same as on the shop page (cart.state.addToCart + a toast with
 ```
 
 **Checkout (demo, no payment)**
-
 ```
 main.startCheckout()
   ─► cart.logic ─► checkout.ui.renderCheckout(summary)        (empty cart: a message and a link to the shop)
@@ -171,7 +164,6 @@ submit ─► checkout.ui (preventDefault) ─► main.onSubmit(values)
 - Once the confirmation is showing (`checkoutPageReady`), cart changes from another tab don't erase it.
 
 **Theme: System / Light / Dark (on every page)**
-
 ```
 before the page is drawn ─► a small script in <head>   (reads "shopboard-theme" and sets <html data-theme>)
 main.startTheme()
@@ -188,15 +180,15 @@ another tab changed the theme, or Back/Forward showed the page (pageshow) ─►
 
 `main.ts` reads `<body data-page>` and only starts what that page has. A missing or unknown `data-page` starts only the theme and the cart badge.
 
-| Page                                                                                                        | `data-page`                                                           | Started by `main.ts`                 |
-| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `index.html`                                                                                                | `home`                                                                | register form                        |
-| `shop.html`                                                                                                 | `shop`                                                                | products, filters, Add to cart       |
-| `product.html`                                                                                              | `product`                                                             | one product and "More in <category>" |
-| `cart.html`                                                                                                 | `cart`                                                                | the cart                             |
-| `checkout.html`                                                                                             | `checkout`                                                            | summary, form, confirmation          |
-| `contact.html`                                                                                              | `contact`                                                             | contact form                         |
-| `about.html`, `faq.html`, `shipping-returns.html`, `privacy.html`, `terms.html`, `credits.html`, `404.html` | `about`, `faq`, `shipping`, `privacy`, `terms`, `credits`, `notfound` | nothing extra (content only)         |
+| Page | `data-page` | Started by `main.ts` |
+|---|---|---|
+| `index.html` | `home` | register form |
+| `shop.html` | `shop` | products, filters, Add to cart |
+| `product.html` | `product` | one product and "More in <category>" |
+| `cart.html` | `cart` | the cart |
+| `checkout.html` | `checkout` | summary, form, confirmation |
+| `contact.html` | `contact` | contact form |
+| `about.html`, `faq.html`, `shipping-returns.html`, `privacy.html`, `terms.html`, `credits.html`, `404.html` | `about`, `faq`, `shipping`, `privacy`, `terms`, `credits`, `notfound` | nothing extra (content only) |
 
 ## Paths: no leading `/`
 
@@ -210,13 +202,13 @@ The site is published on GitHub Pages under `/shopboard/` (https://zainabwatfa.g
 
 A new folder `modules/wishlist/` with only the files it needs:
 
-| Piece                                        | File                |
-| -------------------------------------------- | ------------------- |
-| The `WishlistItem` type                      | `wishlist.types.ts` |
-| Saving in `localStorage`                     | `wishlist.state.ts` |
-| Any calculation                              | `wishlist.logic.ts` |
-| The heart button and drawing the list        | `wishlist.ui.ts`    |
-| Connecting the click to saving, then drawing | `main.ts`           |
+| Piece | File |
+|---|---|
+| The `WishlistItem` type | `wishlist.types.ts` |
+| Saving in `localStorage` | `wishlist.state.ts` |
+| Any calculation | `wishlist.logic.ts` |
+| The heart button and drawing the list | `wishlist.ui.ts` |
+| Connecting the click to saving, then drawing | `main.ts` |
 
 If the wishlist and the cart need the same tool, it goes in `shared/`.
 

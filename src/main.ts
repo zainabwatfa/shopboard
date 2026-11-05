@@ -79,10 +79,7 @@ import { bindContactEvents } from "./modules/contact/contact.ui.ts";
 import { bindRegisterEvents } from "./modules/register/register.ui.ts";
 
 import { parseThemeChoice } from "./modules/theme/theme.logic.ts";
-import {
-  getThemeChoice,
-  saveThemeChoice,
-} from "./modules/theme/theme.state.ts";
+import { getThemeChoice, saveThemeChoice } from "./modules/theme/theme.state.ts";
 import {
   applyTheme,
   bindThemeEvents,
@@ -268,10 +265,7 @@ function startProduct(): void {
         return;
       }
       bindProductPageEvents({ onAdd: addProductToCart });
-      renderProductPage({
-        product,
-        related: getRelatedProducts(products, product),
-      });
+      renderProductPage({ product, related: getRelatedProducts(products, product) });
     },
   };
   bindProductsRetry(() => void loadPage(page));
@@ -343,16 +337,14 @@ function startCheckout(): void {
 // Home page: the register form is a demo, so a valid submit only says so
 function startHome(): void {
   bindRegisterEvents({
-    onSubmit: () =>
-      showToast("Thanks! This is a demo, so nothing was sent or saved."),
+    onSubmit: () => showToast("Thanks! This is a demo, so nothing was sent or saved."),
   });
 }
 
 // Contact page: the same kind of demo form
 function startContact(): void {
   bindContactEvents({
-    onSubmit: () =>
-      showToast("Thanks! This is a demo, so your message was not sent."),
+    onSubmit: () => showToast("Thanks! This is a demo, so your message was not sent."),
   });
 }
 
@@ -385,10 +377,8 @@ refreshCount();
 // browser's cache: read it again and redraw what this page shows
 bindCartSync(() => {
   reloadCart();
-  if (cartPageReady)
-    refreshCart(); // refreshCart also updates the badge
-  else if (checkoutPageReady)
-    refreshCheckout(); // so does refreshCheckout
+  if (cartPageReady) refreshCart(); // refreshCart also updates the badge
+  else if (checkoutPageReady) refreshCheckout(); // so does refreshCheckout
   else refreshCount();
 });
 

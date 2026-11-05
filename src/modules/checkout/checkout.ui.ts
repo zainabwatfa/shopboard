@@ -1,11 +1,7 @@
 // Draws the demo checkout (order summary, empty state, confirmation) and
 // reports a valid form submit to main.ts. Nothing is sent: this site is a demo.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
-import {
-  addStatusButton,
-  renderStatusLine,
-  showStatusButton,
-} from "../../shared/ui/status.ts";
+import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
 import type { CartLine } from "../cart/cart.types.ts";
 import type {
   CheckoutConfirmation,
@@ -30,12 +26,7 @@ function createLine({ product, qty, lineTotal }: CartLine): HTMLLIElement {
   total.className = "checkout-line-total";
   total.textContent = formatMoney(lineTotal);
 
-  row.append(
-    createImage(product.image, "checkout-thumb", 56),
-    name,
-    amount,
-    total,
-  );
+  row.append(createImage(product.image, "checkout-thumb", 56), name, amount, total);
   return row;
 }
 
@@ -66,34 +57,23 @@ export function renderCheckout({ lines, count, total }: CheckoutSummary): void {
   renderCheckoutStatus("");
   getElement("checkout-empty", HTMLDivElement).hidden = lines.length > 0;
   getElement("checkout-layout", HTMLDivElement).hidden = lines.length === 0;
-  getElement("checkout-lines", HTMLUListElement).replaceChildren(
-    ...lines.map(createLine),
-  );
+  getElement("checkout-lines", HTMLUListElement).replaceChildren(...lines.map(createLine));
   getElement("checkout-items", HTMLSpanElement).textContent = itemsText(count);
   getElement("checkout-total", HTMLElement).textContent = formatMoney(total);
 }
 
 // Replaces the form with the confirmation and moves keyboard and screen reader
 // focus to its heading, so the result is announced
-export function renderCheckoutConfirmation({
-  heading,
-  summary,
-}: CheckoutConfirmation): void {
+export function renderCheckoutConfirmation({ heading, summary }: CheckoutConfirmation): void {
   getElement("checkout-form", HTMLFormElement).reset(); // forget what was typed
   getElement("checkout-layout", HTMLDivElement).hidden = true;
   getElement("checkout-empty", HTMLDivElement).hidden = true;
 
   const title = getElement("done-title", HTMLHeadingElement);
   title.textContent = heading;
-  getElement("done-lines", HTMLUListElement).replaceChildren(
-    ...summary.lines.map(createLine),
-  );
-  getElement("done-items", HTMLSpanElement).textContent = itemsText(
-    summary.count,
-  );
-  getElement("done-total", HTMLElement).textContent = formatMoney(
-    summary.total,
-  );
+  getElement("done-lines", HTMLUListElement).replaceChildren(...summary.lines.map(createLine));
+  getElement("done-items", HTMLSpanElement).textContent = itemsText(summary.count);
+  getElement("done-total", HTMLElement).textContent = formatMoney(summary.total);
   getElement("checkout-done", HTMLElement).hidden = false;
   title.focus();
 }

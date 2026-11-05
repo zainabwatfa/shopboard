@@ -11,9 +11,9 @@ export type StatusState = "normal" | "error" | "empty";
 
 // The visible <h1> of the page (the product page has a hidden "not found" one)
 function focusPageHeading(): void {
-  const heading = Array.from(
-    document.querySelectorAll<HTMLElement>("main h1"),
-  ).find((element) => !element.closest("[hidden]"));
+  const heading = Array.from(document.querySelectorAll<HTMLElement>("main h1")).find(
+    (element) => !element.closest("[hidden]"),
+  );
   if (!heading) return;
   if (!heading.hasAttribute("tabindex")) heading.tabIndex = -1;
   heading.focus();
@@ -24,11 +24,7 @@ function focusPageHeading(): void {
 // The line only has keyboard focus after its button disappeared (see
 // showStatusButton). Emptied, it has nothing left to say, so once the page is
 // drawn, focus moves on to the page's heading ("Your cart" after Try again).
-export function renderStatusLine(
-  statusId: string,
-  message: string,
-  state: StatusState,
-): void {
+export function renderStatusLine(statusId: string, message: string, state: StatusState): void {
   const status = getElement(statusId, HTMLParagraphElement);
   status.textContent = message;
   if (state === "normal") {
@@ -38,8 +34,7 @@ export function renderStatusLine(
   }
   if (message === "" && document.activeElement === status) {
     requestAnimationFrame(() => {
-      if (document.activeElement === status && status.textContent === "")
-        focusPageHeading();
+      if (document.activeElement === status && status.textContent === "") focusPageHeading();
     });
   }
 }

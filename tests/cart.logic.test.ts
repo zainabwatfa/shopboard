@@ -14,27 +14,9 @@ import type { Product } from "../src/modules/products/products.types.ts";
 
 // Real entries from public/api/products.json, frozen so nothing can change them
 const PRODUCTS: readonly Product[] = Object.freeze([
-  Object.freeze({
-    id: 1,
-    name: "Leather Tote Bag",
-    category: "Bags",
-    price: 89,
-    image: "products/leather-tote-bag.svg",
-  }),
-  Object.freeze({
-    id: 9,
-    name: "Sunglasses",
-    category: "Accessories",
-    price: 35,
-    image: "products/sunglasses.svg",
-  }),
-  Object.freeze({
-    id: 12,
-    name: "Leather Belt",
-    category: "Accessories",
-    price: 30,
-    image: "products/leather-belt.svg",
-  }),
+  Object.freeze({ id: 1, name: "Leather Tote Bag", category: "Bags", price: 89, image: "products/leather-tote-bag.svg" }),
+  Object.freeze({ id: 9, name: "Sunglasses", category: "Accessories", price: 35, image: "products/sunglasses.svg" }),
+  Object.freeze({ id: 12, name: "Leather Belt", category: "Accessories", price: 30, image: "products/leather-belt.svg" }),
 ]);
 
 function cartOf(...items: [id: number, qty: number][]): readonly CartItem[] {
@@ -55,10 +37,7 @@ describe("getCartLines", () => {
 
   test("skips items whose product does not exist", () => {
     const lines = getCartLines(cartOf([404, 3], [12, 1]), PRODUCTS);
-    assert.deepEqual(
-      lines.map((line) => line.product.id),
-      [12],
-    );
+    assert.deepEqual(lines.map((line) => line.product.id), [12]);
   });
 
   test("an empty cart, or no products, gives no lines", () => {
@@ -79,10 +58,7 @@ describe("getCartCount", () => {
 
 describe("getCartTotal", () => {
   test("adds up price × qty", () => {
-    assert.equal(
-      getCartTotal(cartOf([1, 2], [9, 1], [12, 3]), PRODUCTS),
-      89 * 2 + 35 + 30 * 3,
-    );
+    assert.equal(getCartTotal(cartOf([1, 2], [9, 1], [12, 3]), PRODUCTS), 89 * 2 + 35 + 30 * 3);
   });
 
   test("does not charge for items whose product does not exist", () => {
@@ -105,87 +81,40 @@ describe("getItemQty", () => {
 
 describe("sanitizeCart", () => {
   test("anything that is not a list becomes an empty cart", () => {
-    for (const value of [
-      null,
-      undefined,
-      0,
-      "[]",
-      {},
-      { id: 1, qty: 1 },
-      true,
-    ]) {
+    for (const value of [null, undefined, 0, "[]", {}, { id: 1, qty: 1 }, true]) {
       assert.deepEqual(sanitizeCart(value), [], `for ${JSON.stringify(value)}`);
     }
   });
 
   test("keeps well-formed items", () => {
-    assert.deepEqual(
-      sanitizeCart([
-        { id: 1, qty: 2 },
-        { id: 9, qty: 1 },
-      ]),
-      [
-        { id: 1, qty: 2 },
-        { id: 9, qty: 1 },
-      ],
-    );
+    assert.deepEqual(sanitizeCart([{ id: 1, qty: 2 }, { id: 9, qty: 1 }]), [
+      { id: 1, qty: 2 },
+      { id: 9, qty: 1 },
+    ]);
   });
 
   test("saves only id and qty: extra fields such as a price are dropped", () => {
-    const result = sanitizeCart([
-      { id: 1, qty: 2, price: 0, name: "Leather Tote Bag" },
-    ]);
+    const result = sanitizeCart([{ id: 1, qty: 2, price: 0, name: "Leather Tote Bag" }]);
     assert.deepEqual(result, [{ id: 1, qty: 2 }]); // deepEqual also fails on extra keys
   });
 
   test("drops items that are not objects or miss a field", () => {
-    assert.deepEqual(
-      sanitizeCart([
-        null,
-        1,
-        "x",
-        [],
-        { id: 1 },
-        { qty: 1 },
-        { id: 9, qty: 1 },
-      ]),
-      [{ id: 9, qty: 1 }],
-    );
+    assert.deepEqual(sanitizeCart([null, 1, "x", [], { id: 1 }, { qty: 1 }, { id: 9, qty: 1 }]), [
+      { id: 9, qty: 1 },
+    ]);
   });
 
   test("drops a quantity of 0 or below", () => {
-    assert.deepEqual(
-      sanitizeCart([
-        { id: 1, qty: 0 },
-        { id: 2, qty: -1 },
-        { id: 3, qty: -0 },
-      ]),
-      [],
-    );
+    assert.deepEqual(sanitizeCart([{ id: 1, qty: 0 }, { id: 2, qty: -1 }, { id: 3, qty: -0 }]), []);
   });
 
   test("drops quantities that are not whole numbers", () => {
-    const bad = [
-      1.5,
-      0.1,
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      Number.NEGATIVE_INFINITY,
-      "2",
-      null,
-      true,
-    ];
+    const bad = [1.5, 0.1, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, "2", null, true];
     assert.deepEqual(sanitizeCart(bad.map((qty) => ({ id: 1, qty }))), []);
   });
 
   test("drops quantities too large for + and − to change by exactly 1", () => {
-    assert.deepEqual(
-      sanitizeCart([
-        { id: 1, qty: 2 ** 53 },
-        { id: 2, qty: 1e21 },
-      ]),
-      [],
-    );
+    assert.deepEqual(sanitizeCart([{ id: 1, qty: 2 ** 53 }, { id: 2, qty: 1e21 }]), []);
     assert.deepEqual(sanitizeCart([{ id: 3, qty: Number.MAX_SAFE_INTEGER }]), [
       { id: 3, qty: Number.MAX_SAFE_INTEGER },
     ]);
@@ -198,12 +127,7 @@ describe("sanitizeCart", () => {
 
   test("merges the same id into one line by adding the quantities", () => {
     assert.deepEqual(
-      sanitizeCart([
-        { id: 1, qty: 2 },
-        { id: 9, qty: 1 },
-        { id: 1, qty: 3 },
-        { id: 1, qty: 0 },
-      ]),
+      sanitizeCart([{ id: 1, qty: 2 }, { id: 9, qty: 1 }, { id: 1, qty: 3 }, { id: 1, qty: 0 }]),
       [
         { id: 1, qty: 5 },
         { id: 9, qty: 1 },
@@ -212,17 +136,12 @@ describe("sanitizeCart", () => {
   });
 
   test("works on what JSON.parse gives back", () => {
-    const saved: unknown = JSON.parse(
-      '[{"id":1,"qty":2},{"id":2,"qty":1e999},{"id":3,"qty":"4"}]',
-    );
+    const saved: unknown = JSON.parse('[{"id":1,"qty":2},{"id":2,"qty":1e999},{"id":3,"qty":"4"}]');
     assert.deepEqual(sanitizeCart(saved), [{ id: 1, qty: 2 }]);
   });
 
   test("returns new objects and never changes its input", () => {
-    const input = Object.freeze([
-      Object.freeze({ id: 1, qty: 2 }),
-      Object.freeze({ id: 1, qty: 1 }),
-    ]);
+    const input = Object.freeze([Object.freeze({ id: 1, qty: 2 }), Object.freeze({ id: 1, qty: 1 })]);
     const result = sanitizeCart(input); // input is frozen: changing it would throw
     assert.deepEqual(result, [{ id: 1, qty: 3 }]);
     assert.notEqual(result[0], input[0]);

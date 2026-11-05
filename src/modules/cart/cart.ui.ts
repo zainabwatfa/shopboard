@@ -1,17 +1,8 @@
 // Draws the cart (the header badge on every page, the full cart on the cart page)
 // and reports what the user does there to main.ts.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
-import {
-  addStatusButton,
-  renderStatusLine,
-  showStatusButton,
-} from "../../shared/ui/status.ts";
-import type {
-  CartChange,
-  CartHandlers,
-  CartLine,
-  CartView,
-} from "./cart.types.ts";
+import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
+import type { CartChange, CartHandlers, CartLine, CartView } from "./cart.types.ts";
 
 // The number next to "Cart" in the header, on every page
 export function renderCartCount(count: number): void {
@@ -62,19 +53,9 @@ function createCartRow({ product, qty, lineTotal }: CartLine): HTMLLIElement {
   amountLabel.textContent = "Quantity ";
   amount.append(amountLabel, String(qty));
   qtyBox.append(
-    createCartButton(
-      "−",
-      "dec",
-      product.id,
-      `Decrease quantity of ${product.name}`,
-    ),
+    createCartButton("−", "dec", product.id, `Decrease quantity of ${product.name}`),
     amount,
-    createCartButton(
-      "+",
-      "inc",
-      product.id,
-      `Increase quantity of ${product.name}`,
-    ),
+    createCartButton("+", "inc", product.id, `Increase quantity of ${product.name}`),
   );
 
   const line = document.createElement("span");
@@ -107,12 +88,8 @@ export function renderCartError(message: string): void {
 }
 
 // The sentence for one change, e.g. "Leather Tote Bag: quantity 2. Cart total $178.00."
-function describeChange(
-  change: CartChange,
-  { count, total }: CartView,
-): string {
-  const after =
-    count === 0 ? "Your cart is empty." : `Cart total ${formatMoney(total)}.`;
+function describeChange(change: CartChange, { count, total }: CartView): string {
+  const after = count === 0 ? "Your cart is empty." : `Cart total ${formatMoney(total)}.`;
   switch (change.type) {
     case "quantity":
       return `${change.name}: quantity ${change.qty}. ${after}`;
@@ -137,9 +114,7 @@ export function renderCartChange(change: CartChange, view: CartView): void {
 // Draws the cart page: rows, item count, total, empty message
 export function renderCart({ lines, count, total }: CartView): void {
   renderCartStatus("");
-  getElement("cart-list", HTMLUListElement).replaceChildren(
-    ...lines.map(createCartRow),
-  );
+  getElement("cart-list", HTMLUListElement).replaceChildren(...lines.map(createCartRow));
   getElement("cart-empty", HTMLDivElement).hidden = lines.length > 0;
   getElement("cart-summary", HTMLElement).hidden = lines.length === 0;
   getElement("cart-items", HTMLSpanElement).textContent =
@@ -203,9 +178,7 @@ export function bindCartEvents(handlers: CartHandlers): void {
 
   cartList.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    const button = event.target.closest<HTMLButtonElement>(
-      "button[data-action]",
-    );
+    const button = event.target.closest<HTMLButtonElement>("button[data-action]");
     if (!button) return;
     const id = Number(button.dataset.id);
     const action = button.dataset.action;

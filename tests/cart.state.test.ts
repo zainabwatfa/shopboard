@@ -26,17 +26,12 @@ class FakeStorage {
     return [...this.data.keys()][index] ?? null;
   }
   getItem(key: string): string | null {
-    if (this.failGet)
-      throw new DOMException("The operation is insecure.", "SecurityError");
+    if (this.failGet) throw new DOMException("The operation is insecure.", "SecurityError");
     return this.data.get(key) ?? null;
   }
   setItem(key: string, value: string): void {
     this.setCalls += 1;
-    if (this.failSet)
-      throw new DOMException(
-        "The quota has been exceeded.",
-        "QuotaExceededError",
-      );
+    if (this.failSet) throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
     this.data.set(key, String(value));
   }
   removeItem(key: string): void {
@@ -70,9 +65,7 @@ async function openTab(storage: FakeStorage): Promise<CartState> {
 }
 
 // A storage that already holds a cart, and a tab that loaded it
-async function setup(
-  items?: CartItem[],
-): Promise<{ storage: FakeStorage; tab: CartState }> {
+async function setup(items?: CartItem[]): Promise<{ storage: FakeStorage; tab: CartState }> {
   const storage = new FakeStorage();
   if (items) storage.write(items);
   const tab = await openTab(storage);
@@ -243,11 +236,7 @@ describe("another tab changes the saved cart", () => {
       { id: 1, qty: 4 },
       { id: 9, qty: 1 },
     ]);
-    assert.deepEqual(
-      tab.getCart(),
-      [{ id: 1, qty: 1 }],
-      "nothing changes before reloadCart",
-    );
+    assert.deepEqual(tab.getCart(), [{ id: 1, qty: 1 }], "nothing changes before reloadCart");
     tab.reloadCart();
     assert.deepEqual(tab.getCart(), [
       { id: 1, qty: 4 },
@@ -352,11 +341,7 @@ describe("a save fails", () => {
       { id: 1, qty: 1 },
       { id: 9, qty: 1 },
     ]);
-    assert.deepEqual(
-      storage.saved(),
-      [{ id: 1, qty: 1 }],
-      "storage keeps the older cart",
-    );
+    assert.deepEqual(storage.saved(), [{ id: 1, qty: 1 }], "storage keeps the older cart");
   });
 
   test("reloadCart keeps the newer cart in memory instead of the older saved one", async () => {

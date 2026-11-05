@@ -27,16 +27,7 @@ describe("parsePage", () => {
   });
 
   test("a missing or unknown value gives null, never 'home'", () => {
-    for (const value of [
-      undefined,
-      "",
-      "Home",
-      " shop",
-      "shop ",
-      "wishlist",
-      "404",
-      "shipping-returns",
-    ]) {
+    for (const value of [undefined, "", "Home", " shop", "shop ", "wishlist", "404", "shipping-returns"]) {
       assert.equal(parsePage(value), null, `for ${JSON.stringify(value)}`);
     }
   });

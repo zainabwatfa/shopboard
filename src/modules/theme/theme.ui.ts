@@ -19,17 +19,11 @@ export function renderThemeChoice(choice: ThemeChoice): void {
 }
 
 export function bindThemeEvents(handlers: ThemeHandlers): void {
-  getElement("theme-switch", HTMLFieldSetElement).addEventListener(
-    "change",
-    (event) => {
-      if (
-        event.target instanceof HTMLInputElement &&
-        event.target.name === "theme"
-      ) {
-        handlers.onChange(event.target.value);
-      }
-    },
-  );
+  getElement("theme-switch", HTMLFieldSetElement).addEventListener("change", (event) => {
+    if (event.target instanceof HTMLInputElement && event.target.name === "theme") {
+      handlers.onChange(event.target.value);
+    }
+  });
 }
 
 // Shows the saved theme again when it may differ from what the page shows.

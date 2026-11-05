@@ -61,16 +61,16 @@ Product data is served as JSON from `public/api/products.json`; pictures live in
 
 ### One job per file type
 
-| File                   | Its job                                                                                | Must NOT use                                      |
-| ---------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `*.types.ts`           | The shapes of that feature's data. Types only, nothing runs.                           | any runtime code                                  |
-| `*.api.ts`             | Loads that feature's data through `fetchJson`, then checks it.                         | DOM, `localStorage`, calling `fetch` directly     |
-| `*.logic.ts`           | Pure functions: search, filter, sort, totals, checking data.                           | DOM, `localStorage`, network, changing its inputs |
-| `*.state.ts`           | Owns data that changes and is saved (the cart, the theme choice), with `localStorage`. | DOM, network                                      |
-| `*.ui.ts`              | Draws that feature on the page and reports clicks through handlers.                    | `localStorage`, network, logic                    |
-| `shared/api/client.ts` | The only file that talks to the network.                                               | DOM, `localStorage`                               |
-| `shared/ui/*`          | Page helpers any module can use. The only DOM code outside `*.ui.ts`.                  | `localStorage`, network                           |
-| `main.ts`              | Decides _when_ things happen: loads products, wires handlers, calls render.            | DOM, `localStorage`, network                      |
+| File | Its job | Must NOT use |
+|---|---|---|
+| `*.types.ts` | The shapes of that feature's data. Types only, nothing runs. | any runtime code |
+| `*.api.ts` | Loads that feature's data through `fetchJson`, then checks it. | DOM, `localStorage`, calling `fetch` directly |
+| `*.logic.ts` | Pure functions: search, filter, sort, totals, checking data. | DOM, `localStorage`, network, changing its inputs |
+| `*.state.ts` | Owns data that changes and is saved (the cart, the theme choice), with `localStorage`. | DOM, network |
+| `*.ui.ts` | Draws that feature on the page and reports clicks through handlers. | `localStorage`, network, logic |
+| `shared/api/client.ts` | The only file that talks to the network. | DOM, `localStorage` |
+| `shared/ui/*` | Page helpers any module can use. The only DOM code outside `*.ui.ts`. | `localStorage`, network |
+| `main.ts` | Decides *when* things happen: loads products, wires handlers, calls render. | DOM, `localStorage`, network |
 
 ### Who may import whom
 
@@ -85,21 +85,21 @@ Make a new folder: `modules/wishlist/` with `wishlist.types.ts`, `wishlist.state
 
 ### Pages
 
-| Page                    | `<body data-page>` | What it shows                                                                                                                                                                                                         |
-| ----------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `index.html`            | `home`             | Hero, features, demo register form (sends nothing: a valid submit shows a toast and resets the form)                                                                                                                  |
-| `shop.html`             | `shop`             | Search (every word must match the name or category), filter, sort, product cards; filters live in the URL (`shop.html?category=Bags&q=tote&sort=price-asc`); after "Add to cart", a toast with a **View cart** button |
-| `cart.html`             | `cart`             | Cart rows (+ / − / Remove), summary with a demo note, **Checkout (demo)**, Clear cart                                                                                                                                 |
-| `product.html`          | `product`          | One product from `?id=N` (picture, category, name, price, Add to cart) and "More in <category>"; a clear message for a missing or unknown id                                                                          |
-| `checkout.html`         | `checkout`         | Demo checkout: order summary and a delivery form, no payment fields. A valid submit shows a confirmation and clears the cart; nothing is charged or shipped                                                           |
-| `contact.html`          | `contact`          | Demo contact form (sends nothing: toast and reset); real questions go to GitHub Issues                                                                                                                                |
-| `about.html`            | `about`            | What the demo is, how it's built, link to the code                                                                                                                                                                    |
-| `faq.html`              | `faq`              | Questions about the demo, as `<details>`                                                                                                                                                                              |
-| `shipping-returns.html` | `shipping`         | Nothing ships; what a real shop would explain here                                                                                                                                                                    |
-| `privacy.html`          | `privacy`          | What the site really stores (the two `localStorage` keys) and the third parties (Google Fonts, GitHub Pages)                                                                                                          |
-| `terms.html`            | `terms`            | Demo terms: nothing for sale, MIT code, Pexels photos                                                                                                                                                                 |
-| `credits.html`          | `credits`          | Photo credits for the Pexels photos (also in `CREDITS.md`)                                                                                                                                                            |
-| `404.html`              | `notfound`         | Not-found page GitHub Pages shows for a missing URL                                                                                                                                                                   |
+| Page | `<body data-page>` | What it shows |
+|---|---|---|
+| `index.html` | `home` | Hero, features, demo register form (sends nothing: a valid submit shows a toast and resets the form) |
+| `shop.html` | `shop` | Search (every word must match the name or category), filter, sort, product cards; filters live in the URL (`shop.html?category=Bags&q=tote&sort=price-asc`); after "Add to cart", a toast with a **View cart** button |
+| `cart.html` | `cart` | Cart rows (+ / − / Remove), summary with a demo note, **Checkout (demo)**, Clear cart |
+| `product.html` | `product` | One product from `?id=N` (picture, category, name, price, Add to cart) and "More in <category>"; a clear message for a missing or unknown id |
+| `checkout.html` | `checkout` | Demo checkout: order summary and a delivery form, no payment fields. A valid submit shows a confirmation and clears the cart; nothing is charged or shipped |
+| `contact.html` | `contact` | Demo contact form (sends nothing: toast and reset); real questions go to GitHub Issues |
+| `about.html` | `about` | What the demo is, how it's built, link to the code |
+| `faq.html` | `faq` | Questions about the demo, as `<details>` |
+| `shipping-returns.html` | `shipping` | Nothing ships; what a real shop would explain here |
+| `privacy.html` | `privacy` | What the site really stores (the two `localStorage` keys) and the third parties (Google Fonts, GitHub Pages) |
+| `terms.html` | `terms` | Demo terms: nothing for sale, MIT code, Pexels photos |
+| `credits.html` | `credits` | Photo credits for the Pexels photos (also in `CREDITS.md`) |
+| `404.html` | `notfound` | Not-found page GitHub Pages shows for a missing URL |
 
 - Every page loads `src/styles.css` and `src/main.ts`. `main.ts` reads `data-page` and only starts what that page has; a missing or unknown `data-page` starts only the theme and the cart badge.
 - The site is a demo for a course. Page content must stay true about that: no invented company, address, phone, people or policies presented as real.

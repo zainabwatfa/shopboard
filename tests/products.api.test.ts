@@ -34,51 +34,24 @@ describe("getProducts", () => {
   test("keeps only the entries that are products", async () => {
     stubFetch(() =>
       json([
-        {
-          id: 1,
-          name: "Leather Tote Bag",
-          category: "Bags",
-          price: 89,
-          image: "products/leather-tote-bag.svg",
-        },
-        {
-          id: 2,
-          name: "Canvas Backpack",
-          category: "bags",
-          price: 49,
-          image: "products/canvas-backpack.svg",
-        },
+        { id: 1, name: "Leather Tote Bag", category: "Bags", price: 89, image: "products/leather-tote-bag.svg" },
+        { id: 2, name: "Canvas Backpack", category: "bags", price: 49, image: "products/canvas-backpack.svg" },
         null,
-        {
-          id: 9,
-          name: "Sunglasses",
-          category: "Accessories",
-          price: 35,
-          image: "products/sunglasses.svg",
-        },
+        { id: 9, name: "Sunglasses", category: "Accessories", price: 35, image: "products/sunglasses.svg" },
       ]),
     );
     const products = await getProducts();
-    assert.deepEqual(
-      products.map((product) => product.id),
-      [1, 9],
-    );
+    assert.deepEqual(products.map((product) => product.id), [1, 9]);
   });
 
   test("a body that is not a list is an ApiError", async () => {
     stubFetch(() => json({ products: [] }));
-    await assert.rejects(
-      getProducts(),
-      (error) => error instanceof ApiError && error.status === 200,
-    );
+    await assert.rejects(getProducts(), (error) => error instanceof ApiError && error.status === 200);
   });
 
   test("an HTTP error is an ApiError with its status", async () => {
     stubFetch(() => json({}, 404));
-    await assert.rejects(
-      getProducts(),
-      (error) => error instanceof ApiError && error.status === 404,
-    );
+    await assert.rejects(getProducts(), (error) => error instanceof ApiError && error.status === 404);
   });
 
   test("a network failure is an ApiError with status 0", async () => {
@@ -86,17 +59,12 @@ describe("getProducts", () => {
     stubFetch(() => Promise.reject(cause));
     await assert.rejects(
       getProducts(),
-      (error) =>
-        error instanceof ApiError &&
-        error.status === 0 &&
-        error.cause === cause,
+      (error) => error instanceof ApiError && error.status === 0 && error.cause === cause,
     );
   });
 
   test("a body that is not JSON is an ApiError", async () => {
-    stubFetch(() =>
-      Promise.resolve(new Response("<!doctype html>", { status: 200 })),
-    );
+    stubFetch(() => Promise.resolve(new Response("<!doctype html>", { status: 200 })));
     await assert.rejects(getProducts(), (error) => error instanceof ApiError);
   });
 });
