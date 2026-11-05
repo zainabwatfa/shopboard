@@ -36,8 +36,12 @@ const pages: readonly string[] = [
 // The attribute is text from the page, so check it. A missing or unknown value
 // gives null, and main.ts then starts only what every page has (theme, cart badge).
 // It never falls back to "home", which would look for the register form.
+function isPage(value: string): value is Page {
+  return pages.includes(value);
+}
+
 export function parsePage(value: string | undefined): Page | null {
-  return value !== undefined && pages.includes(value) ? (value as Page) : null;
+  return value !== undefined && isPage(value) ? value : null;
 }
 
 export function getCurrentPage(): Page | null {
@@ -62,5 +66,9 @@ export function getQueryString(): string {
 export function replaceQueryString(query: string): void {
   const { pathname, search, hash } = window.location;
   if (search === query) return;
-  window.history.replaceState(window.history.state, "", `${pathname}${query}${hash}`);
+  window.history.replaceState(
+    window.history.state,
+    "",
+    `${pathname}${query}${hash}`,
+  );
 }

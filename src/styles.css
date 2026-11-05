@@ -12,8 +12,11 @@
 
   /* Fonts (loaded from Google Fonts in each HTML head) */
   --font-poster: "Fraunces", Georgia, "Times New Roman", serif;
-  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-sans:
+    "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Sticker pairs: the tint fills, the shade is only used for its shadow.
      These stay the same in dark mode, always with ink text on top. */
@@ -236,7 +239,8 @@ a {
   background: var(--color-st-pink);
   color: var(--color-on-fill);
   font-weight: 700;
-  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-pink-shade);
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0
+    var(--color-st-pink-shade);
 }
 
 .skip-link:focus {
@@ -315,7 +319,8 @@ a {
 }
 
 .button:hover {
-  box-shadow: calc(var(--btn-depth) + 2px) calc(var(--btn-depth) + 2px) 0 var(--btn-shade);
+  box-shadow: calc(var(--btn-depth) + 2px) calc(var(--btn-depth) + 2px) 0
+    var(--btn-shade);
 }
 
 .button:active {
@@ -673,7 +678,8 @@ a.button[href^="https://"]::after {
 a.hero-tile:hover,
 a.hero-tile:focus-visible {
   z-index: 1;
-  box-shadow: calc(var(--st-shadow-lg) + 3px) calc(var(--st-shadow-lg) + 3px) 0 var(--st-shade);
+  box-shadow: calc(var(--st-shadow-lg) + 3px) calc(var(--st-shadow-lg) + 3px) 0
+    var(--st-shade);
 }
 
 a.hero-tile:active {
@@ -1350,7 +1356,8 @@ textarea:user-invalid {
   border: 2px solid var(--color-line);
   border-radius: var(--st-radius);
   background: var(--color-card);
-  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-pink-shade);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0
+    var(--color-st-pink-shade);
 }
 
 .register-form .button,
@@ -1373,7 +1380,8 @@ textarea:user-invalid {
   border-radius: 32px;
   background: var(--color-panel);
   color: var(--color-on-panel);
-  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-lav-shade);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0
+    var(--color-st-lav-shade);
 }
 
 /* Accent purple is too dark on the panel, so focus rings use lavender here */
@@ -1516,7 +1524,8 @@ textarea:user-invalid {
   border: 2px solid var(--color-line);
   border-radius: var(--st-radius-sm);
   background: color-mix(in srgb, var(--color-st-yellow) 22%, var(--color-card));
-  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-yellow-shade);
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0
+    var(--color-st-yellow-shade);
 }
 
 .callout::before {
@@ -1570,7 +1579,8 @@ textarea:user-invalid {
   border: 2px solid var(--color-line);
   border-radius: var(--st-radius-sm);
   background: var(--color-card);
-  box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0 var(--color-st-lav-shade);
+  box-shadow: var(--st-shadow-md) var(--st-shadow-md) 0
+    var(--color-st-lav-shade);
 }
 
 .prose table {
@@ -1653,7 +1663,8 @@ textarea:user-invalid {
 
 .prose details[open] > summary {
   border-bottom: 1.5px dashed var(--color-hairline-2);
-  border-radius: calc(var(--st-radius-xs) - 2px) calc(var(--st-radius-xs) - 2px) 0 0;
+  border-radius: calc(var(--st-radius-xs) - 2px) calc(var(--st-radius-xs) - 2px)
+    0 0;
 }
 
 .prose details[open] > summary::before {
@@ -1678,7 +1689,8 @@ textarea:user-invalid {
   border-radius: var(--st-radius);
   background: var(--color-st-lav);
   color: var(--color-on-fill);
-  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-lav-shade);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0
+    var(--color-st-lav-shade);
 }
 
 .prose .cta-card h2 {
@@ -2148,7 +2160,8 @@ a.product-media {
   color: var(--color-ink);
   font: 700 0.875rem/1 var(--font-sans);
   text-decoration: none;
-  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-lav-shade);
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0
+    var(--color-st-lav-shade);
 }
 
 .back-link::before {
@@ -2156,7 +2169,8 @@ a.product-media {
 }
 
 .back-link:hover {
-  box-shadow: calc(var(--st-shadow-sm) + 2px) calc(var(--st-shadow-sm) + 2px) 0 var(--color-st-lav-shade);
+  box-shadow: calc(var(--st-shadow-sm) + 2px) calc(var(--st-shadow-sm) + 2px) 0
+    var(--color-st-lav-shade);
 }
 
 /* Product detail: picture first on phones, side by side on wider screens.
@@ -2243,7 +2257,8 @@ a.product-media {
   color: var(--color-on-fill);
   font-weight: 700;
   line-height: 1.4;
-  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0 var(--color-st-yellow-shade);
+  box-shadow: var(--st-shadow-sm) var(--st-shadow-sm) 0
+    var(--color-st-yellow-shade);
 }
 
 /* `hidden` must win, so only set display when the layout is shown */
@@ -2261,7 +2276,8 @@ a.product-media {
   border: 2px solid var(--color-line);
   border-radius: var(--st-radius);
   background: var(--color-card);
-  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-pink-shade);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0
+    var(--color-st-pink-shade);
 }
 
 .checkout-form h2,
@@ -2309,7 +2325,11 @@ a.product-media {
   padding: 0.25rem;
   border: 1.5px solid var(--color-hairline-2);
   border-radius: var(--st-radius-xs);
-  background: color-mix(in srgb, var(--color-st-lav) 35%, var(--color-st-paper));
+  background: color-mix(
+    in srgb,
+    var(--color-st-lav) 35%,
+    var(--color-st-paper)
+  );
 }
 
 .checkout-line-name {
@@ -2342,7 +2362,8 @@ a.product-media {
   border: 2px solid var(--color-line);
   border-radius: var(--st-radius);
   background: var(--color-card);
-  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0 var(--color-st-green-shade);
+  box-shadow: var(--st-shadow-lg) var(--st-shadow-lg) 0
+    var(--color-st-green-shade);
 }
 
 .checkout-done h2 {

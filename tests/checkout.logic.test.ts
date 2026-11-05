@@ -2,14 +2,32 @@
 // the confirmation built from the form and the order summary.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { buildConfirmation, getFirstName } from "../src/modules/checkout/checkout.logic.ts";
+import {
+  buildConfirmation,
+  getFirstName,
+} from "../src/modules/checkout/checkout.logic.ts";
 import type { CartLine } from "../src/modules/cart/cart.types.ts";
-import type { CheckoutFormValues, CheckoutSummary } from "../src/modules/checkout/checkout.types.ts";
+import type {
+  CheckoutFormValues,
+  CheckoutSummary,
+} from "../src/modules/checkout/checkout.types.ts";
 import type { Product } from "../src/modules/products/products.types.ts";
 
 // Real entries from public/api/products.json, frozen so nothing can change them
-const TOTE: Product = Object.freeze({ id: 1, name: "Leather Tote Bag", category: "Bags", price: 89, image: "products/leather-tote-bag.svg" });
-const GLASSES: Product = Object.freeze({ id: 9, name: "Sunglasses", category: "Accessories", price: 35, image: "products/sunglasses.svg" });
+const TOTE: Product = Object.freeze({
+  id: 1,
+  name: "Leather Tote Bag",
+  category: "Bags",
+  price: 89,
+  image: "products/leather-tote-bag.svg",
+});
+const GLASSES: Product = Object.freeze({
+  id: 9,
+  name: "Sunglasses",
+  category: "Accessories",
+  price: 35,
+  image: "products/sunglasses.svg",
+});
 
 // Test data only: what someone could type in the form
 function form(fullName: string): CheckoutFormValues {
@@ -29,7 +47,11 @@ const LINES: CartLine[] = [
   Object.freeze({ product: GLASSES, qty: 1, lineTotal: 35 }),
 ];
 Object.freeze(LINES);
-const SUMMARY: CheckoutSummary = Object.freeze({ lines: LINES, count: 3, total: 213 });
+const SUMMARY: CheckoutSummary = Object.freeze({
+  lines: LINES,
+  count: 3,
+  total: 213,
+});
 
 describe("getFirstName", () => {
   test("gives the first word of the full name", () => {
@@ -46,7 +68,10 @@ describe("getFirstName", () => {
 
   test("keeps letters from any language and punctuation inside a word", () => {
     // An Arabic name ("Sara Ahmad"), written as escapes so this file stays in English
-    assert.equal(getFirstName("\u0633\u0627\u0631\u0629 \u0623\u062d\u0645\u062f"), "\u0633\u0627\u0631\u0629");
+    assert.equal(
+      getFirstName("\u0633\u0627\u0631\u0629 \u0623\u062d\u0645\u062f"),
+      "\u0633\u0627\u0631\u0629",
+    );
     assert.equal(getFirstName("Jean-Luc Picard"), "Jean-Luc");
     assert.equal(getFirstName("O'Neil"), "O'Neil");
   });
@@ -60,7 +85,10 @@ describe("getFirstName", () => {
 
 describe("buildConfirmation", () => {
   test("thanks the customer by first name", () => {
-    assert.equal(buildConfirmation(form("  Sam Lee "), SUMMARY).heading, "Thanks, Sam!");
+    assert.equal(
+      buildConfirmation(form("  Sam Lee "), SUMMARY).heading,
+      "Thanks, Sam!",
+    );
   });
 
   test("says just 'Thanks!' when there is no name to use", () => {
@@ -71,7 +99,11 @@ describe("buildConfirmation", () => {
   test("keeps the order summary: lines, item count and total", () => {
     const { summary } = buildConfirmation(form("Sam"), SUMMARY);
     assert.deepEqual(
-      summary.lines.map((line) => [line.product.name, line.qty, line.lineTotal]),
+      summary.lines.map((line) => [
+        line.product.name,
+        line.qty,
+        line.lineTotal,
+      ]),
       [
         ["Leather Tote Bag", 2, 178],
         ["Sunglasses", 1, 35],
@@ -93,7 +125,11 @@ describe("buildConfirmation", () => {
   });
 
   test("an empty summary stays empty", () => {
-    const { summary } = buildConfirmation(form("Sam"), { lines: [], count: 0, total: 0 });
+    const { summary } = buildConfirmation(form("Sam"), {
+      lines: [],
+      count: 0,
+      total: 0,
+    });
     assert.deepEqual(summary, { lines: [], count: 0, total: 0 });
   });
 });

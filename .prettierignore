@@ -1,0 +1,12 @@
+dist
+node_modules
+package-lock.json
+.claude
+public/api/products.json
+
+# Day 3 module files are copied as they are: the only change allowed is
+# `import type`, so Prettier must not reformat them.
+src/modules/**/*.types.ts
+src/modules/**/*.api.ts
+src/modules/**/*.logic.ts
+src/modules/**/*.state.ts

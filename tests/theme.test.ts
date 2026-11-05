@@ -13,22 +13,32 @@ class FakeStorage {
   fail = false; // like storage blocked by the browser
 
   getItem(key: string): string | null {
-    if (this.fail) throw new DOMException("The operation is insecure.", "SecurityError");
+    if (this.fail)
+      throw new DOMException("The operation is insecure.", "SecurityError");
     return this.data.get(key) ?? null;
   }
   setItem(key: string, value: string): void {
-    if (this.fail) throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+    if (this.fail)
+      throw new DOMException(
+        "The quota has been exceeded.",
+        "QuotaExceededError",
+      );
     this.data.set(key, String(value));
   }
   removeItem(key: string): void {
-    if (this.fail) throw new DOMException("The operation is insecure.", "SecurityError");
+    if (this.fail)
+      throw new DOMException("The operation is insecure.", "SecurityError");
     this.data.delete(key);
   }
 }
 
 const storage = new FakeStorage();
-Object.defineProperty(globalThis, "localStorage", { value: storage, configurable: true });
-const { getThemeChoice, saveThemeChoice } = await import("../src/modules/theme/theme.state.ts");
+Object.defineProperty(globalThis, "localStorage", {
+  value: storage,
+  configurable: true,
+});
+const { getThemeChoice, saveThemeChoice } =
+  await import("../src/modules/theme/theme.state.ts");
 
 describe("parseThemeChoice", () => {
   test("keeps the three known choices", () => {
@@ -38,7 +48,17 @@ describe("parseThemeChoice", () => {
   });
 
   test("anything else means system", () => {
-    for (const value of [null, undefined, "", "Dark", " dark", "blue", 1, {}, ["dark"]]) {
+    for (const value of [
+      null,
+      undefined,
+      "",
+      "Dark",
+      " dark",
+      "blue",
+      1,
+      {},
+      ["dark"],
+    ]) {
       assert.equal(parseThemeChoice(value), "system");
     }
   });

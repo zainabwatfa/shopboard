@@ -39,13 +39,13 @@ Opening `index.html` directly as a file does not work: browsers block module scr
 
 ## Scripts
 
-| Command | What it does |
-|---|---|
-| `npm run dev` | Starts the Vite dev server at http://localhost:5173/. |
-| `npm run typecheck` | Runs `tsc` to check the types. It must print nothing. |
-| `npm test` | Runs the tests in `tests/` with Node's built-in test runner (no extra packages). |
-| `npm run build` | Runs `tsc`, then builds the site into `dist/`. A type error stops the build. |
-| `npm run preview` | Serves the built `dist/` locally so you can check it before deploying. |
+| Command             | What it does                                                                     |
+| ------------------- | -------------------------------------------------------------------------------- |
+| `npm run dev`       | Starts the Vite dev server at http://localhost:5173/.                            |
+| `npm run typecheck` | Runs `tsc` to check the types. It must print nothing.                            |
+| `npm test`          | Runs the tests in `tests/` with Node's built-in test runner (no extra packages). |
+| `npm run build`     | Runs `tsc`, then builds the site into `dist/`. A type error stops the build.     |
+| `npm run preview`   | Serves the built `dist/` locally so you can check it before deploying.           |
 
 ## Project structure
 

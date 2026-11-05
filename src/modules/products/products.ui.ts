@@ -1,7 +1,11 @@
 // Draws the shop page and the product page, and reports what the user does
 // there to main.ts.
 import { createImage, formatMoney, getElement } from "../../shared/ui/dom.ts";
-import { addStatusButton, renderStatusLine, showStatusButton } from "../../shared/ui/status.ts";
+import {
+  addStatusButton,
+  renderStatusLine,
+  showStatusButton,
+} from "../../shared/ui/status.ts";
 import type {
   Filters,
   Product,
@@ -91,16 +95,37 @@ function createCard(product: Product, index: number): HTMLElement {
 
 // totalCount is how many products the shop has. When the filters leave none,
 // the "Clear filters" button offers the way back (not when the shop has none).
-export function renderProducts(list: readonly Product[], totalCount: number): void {
-  getElement("product-grid", HTMLDivElement).replaceChildren(...list.map(createCard));
+export function renderProducts(
+  list: readonly Product[],
+  totalCount: number,
+): void {
+  getElement("product-grid", HTMLDivElement).replaceChildren(
+    ...list.map(createCard),
+  );
   if (totalCount === 0) {
-    renderStatusLine("product-status", "No products are available right now.", "empty");
+    renderStatusLine(
+      "product-status",
+      "No products are available right now.",
+      "empty",
+    );
   } else if (list.length === 0) {
-    renderStatusLine("product-status", "No products match your search.", "empty");
+    renderStatusLine(
+      "product-status",
+      "No products match your search.",
+      "empty",
+    );
   } else {
-    renderStatusLine("product-status", `Showing ${list.length} of ${totalCount} products`, "normal");
+    renderStatusLine(
+      "product-status",
+      `Showing ${list.length} of ${totalCount} products`,
+      "normal",
+    );
   }
-  showStatusButton("product-status", "clear", totalCount > 0 && list.length === 0);
+  showStatusButton(
+    "product-status",
+    "clear",
+    totalCount > 0 && list.length === 0,
+  );
 }
 
 // The status line, on the shop page (above the grid) and the product page:
@@ -148,23 +173,31 @@ export function renderProductPage({ product, related }: ProductPageView): void {
   const image = createImage(product.image, "product-image", 480);
   image.loading = "eager"; // the main picture is at the top of the page
   getElement("product-media", HTMLDivElement).replaceChildren(image);
-  getElement("product-category", HTMLParagraphElement).textContent = product.category;
+  getElement("product-category", HTMLParagraphElement).textContent =
+    product.category;
   getElement("product-name", HTMLHeadingElement).textContent = product.name;
-  getElement("product-price", HTMLParagraphElement).textContent = formatMoney(product.price);
+  getElement("product-price", HTMLParagraphElement).textContent = formatMoney(
+    product.price,
+  );
   const add = getElement("product-add", HTMLButtonElement);
   add.dataset.id = String(product.id);
   add.setAttribute("aria-label", `Add to cart: ${product.name}`); // like the cards
   getElement("product-detail", HTMLElement).hidden = false;
 
   getElement("related-category", HTMLElement).textContent = product.category;
-  getElement("related-grid", HTMLDivElement).replaceChildren(...related.map(createCard));
+  getElement("related-grid", HTMLDivElement).replaceChildren(
+    ...related.map(createCard),
+  );
   getElement("related", HTMLElement).hidden = related.length === 0;
 }
 
 // One listener on a container covers every "Add to cart" button inside it
 // (event delegation), however often its contents are redrawn.
 // event.target can be any node (or null), so check it is an Element first.
-function bindAddButtons(container: HTMLElement, onAdd: (id: number) => void): void {
+function bindAddButtons(
+  container: HTMLElement,
+  onAdd: (id: number) => void,
+): void {
   container.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
     const button = event.target.closest<HTMLButtonElement>("button[data-id]");
@@ -177,8 +210,14 @@ function bindAddButtons(container: HTMLElement, onAdd: (id: number) => void): vo
 export function bindProductEvents(handlers: ProductsHandlers): void {
   const search = getElement("search", HTMLInputElement);
   search.addEventListener("input", handlers.onFiltersChange);
-  getElement("category-filter", HTMLSelectElement).addEventListener("change", handlers.onFiltersChange);
-  getElement("sort", HTMLSelectElement).addEventListener("change", handlers.onFiltersChange);
+  getElement("category-filter", HTMLSelectElement).addEventListener(
+    "change",
+    handlers.onFiltersChange,
+  );
+  getElement("sort", HTMLSelectElement).addEventListener(
+    "change",
+    handlers.onFiltersChange,
+  );
   bindAddButtons(getElement("product-grid", HTMLDivElement), handlers.onAdd);
 
   // Shown by renderProducts when nothing matches. Afterwards the button is
